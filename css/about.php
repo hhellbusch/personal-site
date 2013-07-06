@@ -14,17 +14,15 @@ $name               = "#2B4E72";
 $nameTextColor      = "white";
 $container          = "#4E4D4A";
 $fontColor          = "black";
-$buttonSelectedFadeTo       = "#4074aa";
+$buttonSelectedFadeTo = "#4074aa";
 $buttonSelected = "#4981ba";
 ?>
 
 
 body {
-    text-align:center;
+	text-align:center;
 	font-family: Georgia, Times, Times New Roman, serif;
 	font-size:14px;
-	/*background-image:url('/images/background.svg');*/
-	/*background-size:100%;*/
 	background-color:<?php echo $background; ?>;
 }
 
@@ -48,6 +46,7 @@ img {
 	float: left;
 	width:32px;
 	height:32px;
+	margin-right:5px;
 }
 
 .network_link{
