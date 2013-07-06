@@ -49,6 +49,7 @@
 				<div id="contact_buttons">
 					<?php echo $contactLinks; ?>
 				</div>
+				<div class='clear-both'></div>
 			</div>
 			
 			

@@ -47,6 +47,12 @@ class Henry extends CI_Controller {
 				'username' => 'henry.l.h',
 				'link' => 'aim:goim?screenname=henry.l.h'
 			),
+			'github' => array(
+				'picture' => 'images/github_32.png',
+				'display' => "GitHub",
+				'username' => 'hhellbusch',
+				'link' => 'https://github.com/hhellbusch'
+			),
 		);
 		
 		
@@ -76,6 +82,7 @@ class Henry extends CI_Controller {
 		$html .= $this->load->view('contact_link', $contactLinks['email'], true);
 		$html .= $this->load->view('contact_link', $contactLinks['linkedin'], true);
 		$html .= $this->load->view('contact_link', $contactLinks['google'], true);
+		$html .= $this->load->view('contact_link', $contactLinks['github'], true);
 		$html .= "</div><div class='column'>";
 		$html .= $this->load->view('contact_link', $contactLinks['skype'], true);
 		$html .= $this->load->view('contact_link', $contactLinks['facebook'], true);

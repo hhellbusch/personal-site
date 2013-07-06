@@ -41,7 +41,7 @@ img {
 .column {
 	width: 50%;
 	display:inline-block;
-	
+	float:left;
 }
 
 .network_icon {
@@ -61,11 +61,11 @@ img {
 #container{
 	
 	margin-top:100px;
-    position :relative;
-    margin-left:auto;
-    margin-right:auto;
-    width:540px;
-    height:100;
+	position :relative;
+	margin-left:auto;
+	margin-right:auto;
+	width:540px;
+	height:100;
 	
 	
 }
@@ -78,17 +78,14 @@ img {
 
 #top_header {
 	background-color:<?php echo $content; ?>;
-    text-align:left;
-    position:relative;
-    
-    
-    z-index:5;
-    margin-bottom:0px;
+	text-align:left;
+	position:relative;
+	z-index:5;
+	margin-bottom:0px;
 	padding-top:20px;
-    padding-bottom:20px;
-    padding-left:20px;
-    padding-right:20px;
-	
+	padding-bottom:20px;
+	padding-left:20px;
+	padding-right:20px;
 	border-bottom: 1px solid black;
 	border-top-left-radius: 10px;
 	-moz-border-top-left-radius: 10px;
@@ -119,15 +116,10 @@ img {
 
 #content {
 	background-color:<?php echo $content; ?>;
-	/*height: 200px;*/
-	
 	padding:10px;
-	
-	
 	margin:0;
 	z-index:3;
 	text-align:justify;
-	
 	border: 1px solid black;
 	border-radius: 10px;
 	-moz-border-radius: 10px;
@@ -146,7 +138,6 @@ img {
 	padding-right:5px;
 	z-index:10;
 	border-top: 1px solid black;
-	
 	border-bottom-left-radius: 10px;
 	-moz-border-bottom-left-radius: 10px;
 	-webkit-border-bottom-left-radius: 10px;
@@ -167,12 +158,8 @@ img {
 	-webkit-border-radius: 10px;
 	position: relative;
 	display:inline-block;
-	/*height:80px;*/
-	/*width:260px;*/
 	padding-right:10px;
 	padding-left:10px;
-	
-	
 }
 
 
@@ -268,4 +255,8 @@ img {
 .font{
 	font-family: Georgia, Times, Times New Roman, serif;
 	color: #fff;
+}
+
+.clear-both{
+	clear:both;
 }
