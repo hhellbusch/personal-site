@@ -1,5 +1,29 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+function __autoload($className)
+{
+	//ignore CI stuff.
+	if (
+		'CI' === substr($className, 0, 2) 
+		|| 'MY' === substr($className, 0, 2)
+	) {
+		return;
+	}
+	
+	$className = ltrim($className, '\\');
+  $fileName  = APPPATH . 'classes' . DIRECTORY_SEPARATOR;
+  $namespace = '';
+  if ($lastNsPos = strrpos($className, '\\')) {
+      $namespace = substr($className, 0, $lastNsPos);
+      $className = substr($className, $lastNsPos + 1);
+      $fileName  .= str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+  }
+  $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.class.php';
+  
+  require_once $fileName;
+}
+
+
 /*
 |--------------------------------------------------------------------------
 | Base Site URL
@@ -14,7 +38,7 @@
 | path to your installation.
 |
 */
-$config['base_url']	= 'http://' . $_SERVER['HTTP_HOST'] . '/hellbusch';
+$config['base_url']	= 'http://' . $_SERVER['HTTP_HOST'];
 
 /*
 |--------------------------------------------------------------------------

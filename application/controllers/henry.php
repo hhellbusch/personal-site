@@ -10,7 +10,27 @@ class Henry extends CI_Controller {
 	{
 		$this->load->helper('html');
 		$this->load->helper('url');
-		$contactBlocks = array(
+		$contactBlocks = $this->getContactBlocks1();
+		$contactBlocks = $this->getContactBlocks2();
+		
+		
+		
+		
+		$array = array(
+			'includes' => $this->load->view('aboutMeExternals', null, true),
+			'jsBlock' => 'jQuery(document).ready(function(){onLoad();});',
+			'contactLinks' => $this->generateLinksHTML($contactBlocks),
+			'title' => 'Henry Hellbusch - Student @ RIT'
+		);
+		$this->load->view('defaultHeader', $array);
+		$this->load->view('aboutMe');
+		$this->load->view('defaultFooter');
+
+	}
+
+	private function getContactBlocks1()
+	{
+		return  array(
 			'email' => array(
 				'picture'=> 'images/email_32.png',
 				'display' => "E-mail",
@@ -54,20 +74,54 @@ class Henry extends CI_Controller {
 				'link' => 'https://github.com/hhellbusch'
 			),
 		);
-		
-		
-		
-		
-		$array = array(
-			'includes' => $this->load->view('aboutMeExternals', null, true),
-			'jsBlock' => 'jQuery(document).ready(function(){onLoad();});',
-			'contactLinks' => $this->generateLinksHTML($contactBlocks),
-			'title' => 'Henry Hellbusch - Student @ RIT'
-		);
-		$this->load->view('defaultHeader', $array);
-		$this->load->view('aboutMe');
-		$this->load->view('defaultFooter');
+	}
 
+	private function getContactBlocks2()
+	{
+		return  array(
+			'email' => array(
+				'picture'=> 'images/email.png',
+				'display' => "E-mail",
+				'username' => 'hhellbusch@gmail.com',
+				'link' => 'mailto:hhellbusch@gmail.com'
+			),
+			'linkedin' => array(
+				'picture' => 'images/linkedin.png',
+				'display' => "LinkedIn",
+				'username' => 'hhellbusch',
+				'link' => 'http://www.linkedin.com/in/hhellbusch'
+			),
+			'facebook' => array(
+				'picture' => 'images/facebook.png',
+				'display' => "Facebook",
+				'username' => 'hhellbusch',
+				'link' => 'http://www.facebook.com/hhellbusch'
+			),
+			'skype' => array(
+				'picture' => 'images/skype.png',
+				'display' => "Skype",
+				'username' => 'henry.hellbusch',
+				'link' => 'skype:henry.hellbusch?add&displayname=Henry+Hellbusch'
+			),
+			'google' => array(
+				'picture' => 'images/google.png',
+				'display'  => "Google",
+				'username' => 'hhellbusch',
+				'link' => 'https://plus.google.com/108247750832296214285'
+			),
+			'aim' => array(
+				'picture' => 'images/aim.png',
+				'display' => "AoL.im",
+				'username' => 'henry.l.h',
+				'link' => 'aim:goim?screenname=henry.l.h'
+			),
+			'github' => array(
+				'picture' => 'images/github.png',
+				'display' => "GitHub",
+				'username' => 'hhellbusch',
+				'link' => 'https://github.com/hhellbusch'
+			),
+		);
 	}
 	
 	/**

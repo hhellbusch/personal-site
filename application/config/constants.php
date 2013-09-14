@@ -37,5 +37,15 @@ define('FOPEN_WRITE_CREATE_STRICT',				'xb');
 define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 
 
+
+/**
+ * Physics constants.
+ */
+
+define("BOLTZMANN", 8.6173e-5); // eV / K
+define("PERMITTIVITY_FREE_SPACE", 8.854e-14); // F/cm
+define("ELECTRON_CHARGE", 1.602e-19); //columbs
+
+
 /* End of file constants.php */
 /* Location: ./application/config/constants.php */

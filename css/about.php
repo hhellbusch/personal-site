@@ -33,8 +33,10 @@ img {
 .network_link
 {
 	cursor:pointer;
+
 	height:40px;
 }
+
 
 .column {
 	width: 50%;
