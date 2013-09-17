@@ -21,7 +21,7 @@ class Microelectronics extends CI_Controller
 		$this->load->view('microelectronics/landing');
 	}
 
-	public function MCEE502HW1()
+	public function MCEE502HW2()
 	{
 		$gateThickness = 150; //angstroms
 		$fieldThickness = 6500; //angstroms
