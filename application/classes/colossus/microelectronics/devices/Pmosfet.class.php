@@ -17,8 +17,8 @@ class Pmosfet extends Mosfet
 
 	public function calculateIdealThresholdVoltage()
 	{
-		return 2 * $this->calculateFermiEnergy() 
-			+ abs($this->calculateQsdMax() / $this->getOxideCapicatance());
+		return round(2 * $this->calculateFermiEnergy() 
+			+ abs($this->calculateQsdMax() / $this->getOxideCapicatance()), 3);
 	}
 }
 

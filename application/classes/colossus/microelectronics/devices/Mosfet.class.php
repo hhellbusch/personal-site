@@ -26,7 +26,7 @@ abstract class Mosfet
 		$qsd_max = $this->calculateQsdMax();
 		$vt = $this->calculateFlatBandVoltage() 
 			+ $this->calculateIdealThresholdVoltage();
-		return $vt;
+		return round($vt, 3);
 	}
 
 	public function getPermitivity()
