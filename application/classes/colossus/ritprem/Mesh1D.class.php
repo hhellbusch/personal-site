@@ -2,10 +2,11 @@
 
 namespace colossus\ritprem;
 
-using colossus\ritprem\Concentration;
-using colossus\ritprem\GridPoint;
+use colossus\ritprem\Mesh;
+use colossus\ritprem\Concentration;
+use colossus\ritprem\GridPoint;
 
-class Mesh1D
+class Mesh1D extends Mesh
 {
 	private $gridPoints;
 	private $x;

@@ -2,7 +2,7 @@
 
 namespace colossus\ritprem;
 
-using colossus\ritprem\Concentration;
+use colossus\ritprem\Concentration;
 
 class GridPoint
 {
@@ -18,6 +18,7 @@ class GridPoint
 	{
 		//check to see if we already have a record of the dopant type
 		//if we, add on to it
+		//lazy search...
 		$foundDopant = false;
 		foreach ($this->dopants as $key => $dopant)
 		{

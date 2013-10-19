@@ -1,21 +1,23 @@
 <?php
 
-namespace colossus\riteprem;
+namespace colossus\ritprem;
+
+use colossus\ritprem\Element;
 
 class Concentration
 {
-	private $name;
+	private $element;
 	private $amount;
 
-	public function __construct($name, $amount)
+	public function __construct(Element $element, $amount)
 	{
-		$this->name = $name;
+		$this->element = $element;
 		$this->amount = $amount;
 	}
 
-	public function getName()
+	public function getElement()
 	{
-		return $name;
+		return $element;
 	}
 
 	public function getAmount()
