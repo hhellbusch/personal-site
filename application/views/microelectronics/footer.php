@@ -2,7 +2,9 @@
 </div> <!--/.wrap-->
 <div id="footer">
 	<div class="container">
-		<p class="text-muted credit">Henry Hellbusch</p>
+		<p class="text-muted credit">
+			Group project by  Henry Hellbusch, Nate Walsh, Will Abisalih and Nicholas Edwards
+		</p>
 	</div>
 </div>
 

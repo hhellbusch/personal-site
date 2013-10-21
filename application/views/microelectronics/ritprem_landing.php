@@ -12,7 +12,8 @@ $asssets = array(
 );
 $headerData = array(
 	'assets' => $asssets,
-	'jsOnload' => 'draw();'
+	'jsOnload' => 'draw();',
+	'js' => 'var graphData = ' . json_encode($graphData) . ';'
 );
 $this->load->view('microelectronics/header', $headerData); 
 ?>

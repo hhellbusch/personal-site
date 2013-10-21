@@ -17,18 +17,24 @@ class ElementFactory
 		$boron->setSymbol("B");
 		$boron->setAtomicWeight(10.811);
 		$boron->setAtomicNumber(5);
+		$boron->setDiffusionCoef(10.5);
+		$boron->setActivationEnergy(3.69);
 
 		$phosphorus = new Element();
 		$phosphorus->setFullName('phosphorus');
 		$phosphorus->setSymbol("P");
 		$phosphorus->setAtomicWeight(30.973);
 		$phosphorus->setAtomicNumber(15);
+		$phosphorus->setDiffusionCoef(10.5);
+		$phosphorus->setActivationEnergy(3.69);
 
 		$arsenic = new Element();
 		$arsenic->setFullName('arsenic');
 		$arsenic->setSymbol("As");
 		$arsenic->setAtomicWeight(74.922);
 		$arsenic->setAtomicNumber(33);
+		$arsenic->setDiffusionCoef(0.32);
+		$arsenic->setActivationEnergy(3.56);
 
 		$this->lookupTable = array(
 			'B' => $boron,

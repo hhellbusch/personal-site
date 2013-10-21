@@ -15,19 +15,36 @@ class Concentration
 		$this->amount = $amount;
 	}
 
+	
+
 	public function getElement()
 	{
-		return $element;
+		return $this->element;
+	}
+
+	public function getElementName()
+	{
+		return $this->element->getFullName();
 	}
 
 	public function getAmount()
 	{
-		return $amount;
+		return $this->amount;
+	}
+
+	public function getConcentration()
+	{
+		return $this->getAmount();
 	}
 
 	public function add($amount)
 	{
 		$this->amount += $amount;
+	}
+
+	public function setConcentration($amount)
+	{
+		$this->amount = $amount;
 	}
 
 	public function subtract($amount)

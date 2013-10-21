@@ -1,24 +1,32 @@
+var graphMinPower = 10;
+var graphMaxPower = 20;
+
 var draw = function()
 {
 	var options = {
 		xaxis : {
 			axisLabel : "depth (um)",
 			axisLabelUseCanvas : true,
-			ticks: 4
+			//ticks: 4
 		},
 		yaxis : {
 			axisLabel : "concentration (cm^-3)",
 			axisLabelUseCanvas : true,
 			transform:  function(v) 
 			{
-				return Math.log(v+0.0001); /*move away from zero*/
+				/*move away from zero*/
+				return Math.log(v+(Math.pow(10, graphMinPower)));
 			},
-			ticks: [0.001,0.01,0.1,1,10,100],
+			ticks: generateLogScaleTickValues(graphMinPower, graphMaxPower),
 			tickDecimals: 3,
 			tickFormatter: function (v, axis) 
 			{
+				var str = "" + v;
+				if (str.indexOf('1') == -1) return "";
 				return "10" + (Math.round( Math.log(v)/Math.LN10)).toString().sup();
-			}
+			},
+			//minTickSize:1,
+			//tickLength:10
 		},
 		
 		legend:{
@@ -27,15 +35,13 @@ var draw = function()
 		},
 		lines : {
 			show: true
+		},
+		points: {
+			show: true
 		}
 	};
 
 
-
-	
-
-	var data1 = sampleFunction( 0, 5, function(x){ return Math.exp(x)*Math.sin(x)*Math.sin(x) } );
-	var graphData = [{label: "label!", data: data1}];
 	$.plot($('#theGraph'), graphData, options);
 	// var previousPoint = null;
 	// $('#theGraph').bind('plothover', function (event, pos, item) 
@@ -65,4 +71,26 @@ function sampleFunction(x1, x2, func) {
 		d.push([i, func( i ) ]);
 
 	return d;
+}
+
+function generateLogScaleTickValues(minPower, maxPower)
+{
+	var ticks = [];
+	for (var power = minPower; power < maxPower; power++)
+	{
+		var zeros = Math.pow(10, power); //creates the right magnitude
+		for (var i = 1; i <= 9; i++)
+		{
+			//multiply the zeros by integers from 1 to 9
+			var num = i * zeros;
+			if (num < 1)
+			{
+				num = num.toFixed(Math.abs(power));
+			}
+			ticks.push(num);
+		}
+	}
+	ticks.push(Math.pow(10, maxPower));
+	console.log(ticks);
+	return ticks;
 }

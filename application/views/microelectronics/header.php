@@ -58,6 +58,7 @@
 </head>
 <body>
 	<div id="wrap">
+		<?php /*
 		<div class="navbar navbar-default navbar-fixed-top">
 			<div class="container">
 				<div class="navbar-header">
@@ -91,5 +92,6 @@
 				</div><!--/.nav-collapse -->
 			</div><!-- /.container -->
 		</div> <!-- /.navbar -->
+		*/ ?>
 	<div class='container'>
 
