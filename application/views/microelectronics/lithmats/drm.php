@@ -3,11 +3,11 @@ $asssets = array(
 	'additionalJSFiles' => array(
 		'jquery/flot/jquery.flot',
 		'jquery/flot/jquery.flot.axislabel',
-		'ritprem/draw'
+		'lithmats/drm'
 	),
 	'additionalCSSFiles' => array(
 		'bootstrap/sticky-footer-navbar',
-		'ritprem'
+		'lithmats/drm'
 	)
 );
 $headerData = array(
@@ -17,14 +17,13 @@ $headerData = array(
 );
 $this->load->view('microelectronics/header', $headerData); 
 ?>
-<h1>RITPREM</h1>
+<h1>DRM</h1>
 
 <div class="graphPlaceholder" id="theGraph" style="width:1018;height:550px;"></div>
 <div id="legendContainer"></div>
 
-<?php
+<?php 
 $this->load->view(
-	'microelectronics/footer',
-	array('credit' => "Group project by  Henry Hellbusch, Nate Walsh, Will Abisalih and Nicholas Edwards")
-); 
-?>
+	'microelectronics/footer', 
+	array('credit'=>"Henry Hellbusch - MCEE505 Homework 5 problem 3")
+); ?>
