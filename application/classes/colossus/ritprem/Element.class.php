@@ -34,6 +34,16 @@ class Element
 		return $this->dopantType;
 	}
 
+	public function isDonor()
+	{
+		return $this->getDopantType() == 'n';
+	}
+
+	public function isAcceptor()
+	{
+		return $this->getDopantType() == 'p';
+	}
+
 	public function getFullName()
 	{
 		return $this->name;

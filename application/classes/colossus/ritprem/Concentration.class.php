@@ -25,6 +25,16 @@ class Concentration
 		return $this->element->getFullName();
 	}
 
+	public function isDonor()
+	{
+		return $this->element->isDonor();
+	}
+
+	public function isAcceptor()
+	{
+		return $this->element->isAcceptor();
+	}
+
 	public function getAmount()
 	{
 		return $this->amount;

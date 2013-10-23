@@ -116,7 +116,8 @@ class Ritprem extends CI_Controller
 		$implanter->setEnergy(50);
 		$implanter->setElement($specie);
 		$implantedMesh = $implanter->getImplantedMesh();
-		echo 'dose: ' . $mesh->getDose('boron');
+		echo 'dose: ' . $mesh->getDose('boron') . "<br />";
+		echo ' xj: ' . round($mesh->getJunctionDepth(), 6);
 		
 		
 		return $implantedMesh->getFlotData();

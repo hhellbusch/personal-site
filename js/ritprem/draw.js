@@ -1,5 +1,5 @@
-var graphMinPower = 11;
-var graphMaxPower = 25;
+var graphMinPower = 9;
+var graphMaxPower = 22;
 
 var draw = function()
 {

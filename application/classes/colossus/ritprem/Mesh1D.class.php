@@ -13,7 +13,6 @@ class Mesh1D extends Mesh
 	private $x;
 	private $dx;
 
-
 	public function __construct($x, $dx, $baseConcentration = null)
 	{
 		$this->x = $x;
@@ -134,9 +133,56 @@ class Mesh1D extends Mesh
 		return $sum;
 	}
 
+	/**
+	 * this is very brute force and could probably be optimized in some manner
+	 *
+	 * basically  it sweeps the grid looking for the points where the p type dopant
+	 * and n type dopant differnce switches from neg to pos or pos to neg.
+	 * when these points are found, intersection of the two lines is used.
+	 *
+	 * math originally figured out by drunk nate; fixed by sober henry
+	 * @return double the point (depth in um) where the dopants intersect.
+	 */
 	public function getJunctionDepth()
 	{
-		
+		$previousDifference = null;
+		$previousGridPoint = null;
+		foreach ($this->gridPoints as $i => $gridPoint)
+		{
+			if (is_null($previousGridPoint)) $previousGridPoint = $gridPoint;
+			$difference = $previousGridPoint->getAcceptorConc() - $gridPoint->getDonorConc();
+			
+			if (!is_null($previousDifference))
+			{
+				//check to see if the signs are opposite
+				if (
+					($previousDifference > 0 && $difference < 0) 
+					|| ($previousDifference < 0 && $difference > 0)
+				) {
+					$x1 = $this->dx * ($i - 1);
+					$x2 = $this->dx * ($i);
+
+					//find intersection point!
+					$p2 = $gridPoint->getAcceptorConc();
+					$p1 = $previousGridPoint->getAcceptorConc();
+					$n2 = $gridPoint->getDonorConc();
+					$n1 = $previousGridPoint->getDonorConc();
+
+					$mn = ($n1-$n2)/($x1-$x2);
+					$mp = ($p1-$p2)/($x1-$x2);
+
+					$bp = $p1 - $mp * $x1;
+					$bn = $n1 - $mn * $x1;
+
+					$xj = ($bp - $bn)/($mn - $mp);
+					return $xj;
+				}
+			}
+
+			$previousDifference = $difference;
+			$previousGridPoint = $gridPoint;
+		}
+		return 'unknown';
 	}
 
 }
