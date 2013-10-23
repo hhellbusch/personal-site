@@ -12,6 +12,7 @@ class Element
 	private $atomicNumber;
 	private $diffusionCoef;
 	private $activationEnergy;
+	private $dopantType;
 
 	public function __construct()
 	{
@@ -21,6 +22,16 @@ class Element
 	public function equal(Element $other)
 	{
 		return ($other->getFullName() == $this->getFullName());
+	}
+
+	public function setDopantType($dopantType)
+	{
+		$this->dopantType = $dopantType;
+	}
+
+	public function getDopantType()
+	{
+		return $this->dopantType;
 	}
 
 	public function getFullName()

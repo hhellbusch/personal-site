@@ -5,3 +5,8 @@ body {
 img {
 	border:none;
 }
+
+.form-control{
+	width:auto;
+	display:inline;
+}

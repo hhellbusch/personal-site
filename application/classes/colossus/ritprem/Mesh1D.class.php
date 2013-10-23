@@ -114,6 +114,31 @@ class Mesh1D extends Mesh
 		array_push($this->gridPoints, $newPoint);
 	}
 
+	public function getDx_cm()
+	{
+		return $this->dx * pow(10, -4); //um to cm
+	}
+
+	public function getDose($elemName)
+	{
+		$sum = 0;
+		foreach ($this->gridPoints as $gridPoint)
+		{
+			$dopants = $gridPoint->getDopants();
+			foreach ($dopants as $dopant)
+			{
+				if ($dopant->getElementName() == strtolower($elemName))
+					$sum += $dopant->getConcentration() * $this->getDx_cm();
+			}
+		}
+		return $sum;
+	}
+
+	public function getJunctionDepth()
+	{
+		
+	}
+
 }
 
 ?>

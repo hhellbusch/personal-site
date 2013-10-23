@@ -1,5 +1,5 @@
 var graphMinPower = 11;
-var graphMaxPower = 21;
+var graphMaxPower = 25;
 
 var draw = function()
 {
@@ -22,7 +22,9 @@ var draw = function()
 			tickFormatter: function (v, axis) 
 			{
 				var str = "" + v;
-				if (str.indexOf('1') == -1) return "";
+				var oneIndex = str.indexOf('1');
+				if (oneIndex == -1 || oneIndex != 0) return "";
+				console.log(v);
 				return "10" + (Math.round( Math.log(v)/Math.LN10)).toString().sup();
 			},
 			//minTickSize:1,

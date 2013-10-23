@@ -19,6 +19,7 @@ class ElementFactory
 		$boron->setAtomicNumber(5);
 		$boron->setDiffusionCoef(10.5);
 		$boron->setActivationEnergy(3.69);
+		$boron->setDopantType('p');
 		$boron->setStraggleFunc(
 			function($energy){
 				return 315.96 * log($energy, M_E) - 559.69;
@@ -38,6 +39,7 @@ class ElementFactory
 		$phosphorus->setAtomicNumber(15);
 		$phosphorus->setDiffusionCoef(10.5);
 		$phosphorus->setActivationEnergy(3.69);
+		$phosphorus->setDopantType('n');
 		$phosphorus->setStraggleFunc(
 			function($energy){
 				return -0.0077*pow($energy,2)+5.1189*$energy+36.85;
@@ -56,6 +58,7 @@ class ElementFactory
 		$arsenic->setAtomicNumber(33);
 		$arsenic->setDiffusionCoef(0.32);
 		$arsenic->setActivationEnergy(3.56);
+		$arsenic->setDopantType('n');
 		$arsenic->setStraggleFunc(
 			function($energy){
 				return 9.0659*pow($energy, 0.68);
@@ -72,6 +75,16 @@ class ElementFactory
 			'P' => $phosphorus,
 			'As' => $arsenic
 		);
+	}
+
+	public function getDopants()
+	{
+		$dopants = array();
+		foreach ($this->lookupTable as $elem)
+		{
+			$dopants[] = $elem;
+		}
+		return $dopants;
 	}
 
 	public function getElement($symbol)

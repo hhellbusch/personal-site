@@ -29,10 +29,12 @@
  * Author: Henry Hellbusch
  * Date: 10/5/2013
  *
- * Team Members: Nate Walsh, Will Abisalih, Nicholas Edwards
+ * Team Members: (supreme ruler) (so he says)Nate Walsh, 
+ * 	Will Abisalih, Nicholas Edwards
  *
  * number of beers consumed while programming this:
- * 	Henry : 7
+ * 	Henry : 8
+ * 	Nate  : 1
  *
  * number of wines consumed while programming this:
  * 	Nate: 1
@@ -47,27 +49,37 @@ use colossus\ritprem\Implanter;
 class Ritprem extends CI_Controller 
 {
 
+	private $elemFactory;
+
 	function __construct ()
 	{
 		parent::__construct();
+
+		$this->elemFactory = new ElementFactory;
+
 		$this->load->helper('html');
 
-		 ini_set('xdebug.var_display_max_depth', '10');
-		 ini_set('xdebug.var_display_max_children', 1E10);
+		ini_set('xdebug.var_display_max_depth', '10');
+		ini_set('xdebug.var_display_max_children', 1E10);
 	}
 	
 	public function index()
 	{
+		$dopants = $this->elemFactory->getDopants();
+		$this->load->view('microelectronics/ritprem_landing', array('dopants' => $dopants));
+	}
+
+	public function constantSource()
+	{
 		$flotData = $this->doSimulation();
-		$this->load->view('microelectronics/ritprem_landing', array('graphData' => $flotData));
-		
+		$this->load->view('microelectronics/ritprem_graph', array('graphData' => $flotData));
 	}
 
 	private function doSimulation()
 	{
-		$elemFactory = new ElementFactory;
+		
 		$sim = new Simulator();
-		$baseConc = new Concentration($elemFactory->getElement('B'), 1E15);
+		$baseConc = new Concentration($this->elemFactory->getElement('B'), 1E15);
 		$mesh = new Mesh1D(1.5, 0.01, $baseConc);
 		$sim->setMesh($mesh);
 		$sim->setDiffusitivy('constant');
@@ -76,7 +88,7 @@ class Ritprem extends CI_Controller
 		$duration = 60;
 		
 		$sim->setDuration($duration); //seconds
-		$surfaceElement = $elemFactory->getElement('As');
+		$surfaceElement = $this->elemFactory->getElement('As');
 		$surface = new Concentration($surfaceElement, 1E20);
 
 		$sim->consantSurfaceSource($surface);
@@ -89,23 +101,22 @@ class Ritprem extends CI_Controller
 	public function implant()
 	{
 		$flotData = $this->doImplant();
-		$this->load->view('microelectronics/ritprem_landing', array('graphData' => $flotData));
+		$this->load->view('microelectronics/ritprem_graph', array('graphData' => $flotData));
 	}
 
 	private function doImplant()
 	{
-		$elemFactory = new ElementFactory;
-		$baseConc = new Concentration($elemFactory->getElement('P'), 1E15);
+		$baseConc = new Concentration($this->elemFactory->getElement('P'), 1E15);
 		$mesh = new Mesh1D(1.5, 0.01, $baseConc);
 		
-		$specie = $elemFactory->getElement('B');
+		$specie = $this->elemFactory->getElement('B');
 		$implanter = new Implanter();
 		$implanter->setMesh($mesh);
 		$implanter->setDose(2E15);
 		$implanter->setEnergy(50);
 		$implanter->setElement($specie);
 		$implantedMesh = $implanter->getImplantedMesh();
-
+		echo 'dose: ' . $mesh->getDose('boron');
 		
 		
 		return $implantedMesh->getFlotData();
