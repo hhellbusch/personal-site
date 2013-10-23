@@ -83,6 +83,29 @@ class Element
 	{
 		$this->activationEnergy = $activationEnergy;
 	}
+
+	//implant stuff
+	public function getProjectedRange($energy)
+	{
+		$func = $this->calcProjectedRange;
+		return $func($energy);
+	}
+
+	public function getStraggle($energy)
+	{
+		$func = $this->calcStraggle;
+		return $func($energy);
+	}
+
+	public function setStraggleFunc($func)
+	{
+		$this->calcStraggle = $func;
+	}
+	public function setProjectedRangeFunc($func)
+	{
+		$this->calcProjectedRange = $func;
+	}
+
 }
 
 ?>

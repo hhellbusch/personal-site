@@ -12,7 +12,6 @@ class Mesh1D extends Mesh
 	private $gridPoints;
 	private $x;
 	private $dx;
-	private $dopantElements;
 
 
 	public function __construct($x, $dx, $baseConcentration = null)
@@ -24,7 +23,10 @@ class Mesh1D extends Mesh
 		$this->gridPoints = array();
 		if (!is_null($baseConcentration))
 		{
-			$this->gridPoints = array_pad(array(),$numPoints, new GridPoint());
+			for ($i = 0; $i < $numPoints; $i++)
+			{
+				$this->gridPoints[] = new GridPoint();
+			}
 			$this->addBaseConc($baseConcentration);
 		}
 	}
@@ -35,11 +37,6 @@ class Mesh1D extends Mesh
 		{
 			$this->gridPoints[$i]->addDopant($concentration);
 		}
-	}
-
-	private function addDopantType(Element $element)
-	{
-		$this->dopantElements[] = $element;
 	}
 
 	/**
@@ -76,7 +73,6 @@ class Mesh1D extends Mesh
 				}
 			}
 		}
-
 
 		foreach ($organizedData as $label => $data)
 		{

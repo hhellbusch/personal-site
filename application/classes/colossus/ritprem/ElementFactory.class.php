@@ -19,6 +19,17 @@ class ElementFactory
 		$boron->setAtomicNumber(5);
 		$boron->setDiffusionCoef(10.5);
 		$boron->setActivationEnergy(3.69);
+		$boron->setStraggleFunc(
+			function($energy){
+				return 315.96 * log($energy, M_E) - 559.69;
+			}
+		);
+		$boron->setProjectedRangeFunc(
+			function($energy){
+				return 53.789*pow($energy, 0.8862);
+			}
+		);
+		
 
 		$phosphorus = new Element();
 		$phosphorus->setFullName('phosphorus');
@@ -27,6 +38,16 @@ class ElementFactory
 		$phosphorus->setAtomicNumber(15);
 		$phosphorus->setDiffusionCoef(10.5);
 		$phosphorus->setActivationEnergy(3.69);
+		$phosphorus->setStraggleFunc(
+			function($energy){
+				return -0.0077*pow($energy,2)+5.1189*$energy+36.85;
+			}
+		);
+		$phosphorus->setProjectedRangeFunc(
+			function($energy){
+				return -0.0016*pow($energy, 2)+13.199*$energy+36.045;
+			}
+		);
 
 		$arsenic = new Element();
 		$arsenic->setFullName('arsenic');
@@ -35,6 +56,16 @@ class ElementFactory
 		$arsenic->setAtomicNumber(33);
 		$arsenic->setDiffusionCoef(0.32);
 		$arsenic->setActivationEnergy(3.56);
+		$arsenic->setStraggleFunc(
+			function($energy){
+				return 9.0659*pow($energy, 0.68);
+			}
+		);
+		$arsenic->setProjectedRangeFunc(
+			function($energy){
+				return 18.693*pow($energy,0.787);
+			}
+		);
 
 		$this->lookupTable = array(
 			'B' => $boron,

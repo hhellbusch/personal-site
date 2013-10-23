@@ -45,6 +45,18 @@ class Simulator
 		return $this->mesh;
 	}
 
+	private function calcDt($element)
+	{
+		$dx = $this->mesh->getDx();
+		$dx_cm = $dx * 1E-4;
+		$diffusivity = $element->getDiffusivity($this->temperature);
+		$max_dt = pow($dx_cm, 2) / (2 * $diffusivity);
+
+		$n = ceil($this->duration/$max_dt) + 10; //forces a finer time increment - produces a better graph
+		$dt = $this->duration / $n;
+		return $dt;
+	}
+
 	public function consantSurfaceSource(Concentration $surfaceConcentration)
 	{
 		$elemFactory = new ElementFactory();
@@ -52,81 +64,66 @@ class Simulator
 		$this->mesh->unshift($topGridPoint);
 		$surfaceGridPoint = clone $topGridPoint;
 		$surfaceGridPoint->addDopant($surfaceConcentration);
-	
+		$dx = $this->mesh->getDx();
 		$zeroConc = new Concentration($surfaceConcentration->getElement(), 0);
 		$this->mesh->addBaseConc($zeroConc);
 	
 		$element = $surfaceConcentration->getElement();
-		$dx = $this->mesh->getDx();
-		$dx_cm = $dx * 1E-4;
-		$diffusivity = $element->getDiffusivity($this->temperature);
-		$dt = pow($dx_cm, 2) / (2 * $diffusivity);
-		//change dt such that it properly fits into the given duration
-		//dont want to simulate duration * 1.2 instead of just duration.
-
+		$dt = $this->calcDt($element);
 		
-		
-		//for all time
 		for ($currentTime = 0; $currentTime < $this->duration; $currentTime += $dt)
 		{
-			// echo '<h2>new time loop! </h2>';
 			$previousMesh = clone $this->mesh;
 			$newMesh = new Mesh1D($this->mesh->getX(), $this->mesh->getDx());
 			
 			$previousMesh->unshift($surfaceGridPoint);
 			$previousGridPoints = $previousMesh->getGridPoints();
-			
-			// for each point
-			// echo 'looking at grid points....<br />';
-			// echo 'input: <br />';
-
-			foreach ($previousGridPoints as $i => $previousGridPoint)
+			$numGridPoints = count ($previousGridPoints);
+			for ($index = 0; $index < $numGridPoints; $index++)
 			{
-				// echo '<hr />';
-				// echo 'looking at! :'.$i.' <br />';
-				// var_dump($previousGridPoint);
-				$dopants = $previousGridPoint->getDopants();
-				$leftPoint = $previousGridPoint;
-				if (isset($previousGridPoints[$i - 1]))
-				{
-					$leftPoint = $previousGridPoints[$i -1];
-				}
-				$rightPoint = $previousGridPoint;
-				if (isset($previousGridPoints[$i + 1]))
-				{
-					$rightPoint = $previousGridPoints[$i + 1];
-				}
-				// echo 'left point:<br />';
-				// var_dump($leftPoint);
-				// echo 'right point:<br />';
-				// var_dump($rightPoint);
-				$rightDopants = $rightPoint->getDopants();
-				$leftDopants = $leftPoint->getDopants();
-				
-				//for each dopant at each point
-				$newGridPoint = new GridPoint();
-				foreach ($dopants as $dopantKey => $dopant)
-				{
-					//new conc = previous conc + D * dt / dx^2 * (neighborConc - 2* prevConc - otherNeighborConc)
-					$previousConc = $dopant->getConcentration();
-					$changeCoef = $dopant->getElement()->getDiffusivity($this->temperature) * $dt / pow($dx_cm, 2);
-					
-					$leftCoef = $leftDopants[$dopantKey]->getConcentration();
-					$rightCoef = $rightDopants[$dopantKey]->getConcentration();
-					$newConc = $previousConc + $changeCoef * ($leftCoef + $rightCoef - 2 * $previousConc);
-					$newConcObj = new Concentration($dopant->getElement(), $newConc);
-					
-					$newGridPoint->addDopant($newConcObj);
-				}
-				// echo 'new grid point:<br />';
-				// var_dump($newGridPoint);
+				$newGridPoint = $this->diffuseDopantsAtIndex($previousGridPoints, $index, $dt, $dx);
 				$newMesh->push($newGridPoint);
 			}
-			//var_dump($newMesh);
 			$newMesh->shift();
 			$this->mesh = clone $newMesh;
-		} // end for all time
-		// var_dump($this->mesh);
+		}
+	}
+
+	private function diffuseDopantsAtIndex($previousGridPoints, $i, $dt, $dx)
+	{
+		$dx_cm = $dx * 1E-4;
+		$previousGridPoint = $previousGridPoints[$i];
+		$dopants = $previousGridPoint->getDopants();
+		$leftPoint = $previousGridPoint;
+		if (isset($previousGridPoints[$i - 1]))
+		{
+			$leftPoint = $previousGridPoints[$i -1];
+		}
+		$rightPoint = $previousGridPoint;
+		if (isset($previousGridPoints[$i + 1]))
+		{
+			$rightPoint = $previousGridPoints[$i + 1];
+		}
+		
+		$rightDopants = $rightPoint->getDopants();
+		$leftDopants = $leftPoint->getDopants();
+		
+		//for each dopant at each point
+		$newGridPoint = new GridPoint();
+		foreach ($dopants as $dopantKey => $dopant)
+		{
+			//new conc = previous conc + D * dt / dx^2 * (neighborConc - 2* prevConc - otherNeighborConc)
+			$previousConc = $dopant->getConcentration();
+			$changeCoef = $dopant->getElement()->getDiffusivity($this->temperature) * $dt / pow($dx_cm, 2);
+			
+			$leftCoef = $leftDopants[$dopantKey]->getConcentration();
+			$rightCoef = $rightDopants[$dopantKey]->getConcentration();
+			$newConc = $previousConc + $changeCoef * ($leftCoef + $rightCoef - 2 * $previousConc);
+			$newConcObj = new Concentration($dopant->getElement(), $newConc);
+			
+			$newGridPoint->addDopant($newConcObj);
+		}
+		return $newGridPoint;
 	}
 
 	public function setDiffusitivy()

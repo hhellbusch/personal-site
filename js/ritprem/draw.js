@@ -1,5 +1,5 @@
-var graphMinPower = 10;
-var graphMaxPower = 20;
+var graphMinPower = 11;
+var graphMaxPower = 21;
 
 var draw = function()
 {
@@ -41,7 +41,7 @@ var draw = function()
 		}
 	};
 
-
+	console.log(graphData);
 	$.plot($('#theGraph'), graphData, options);
 	// var previousPoint = null;
 	// $('#theGraph').bind('plothover', function (event, pos, item) 
@@ -91,6 +91,5 @@ function generateLogScaleTickValues(minPower, maxPower)
 		}
 	}
 	ticks.push(Math.pow(10, maxPower));
-	console.log(ticks);
 	return ticks;
 }

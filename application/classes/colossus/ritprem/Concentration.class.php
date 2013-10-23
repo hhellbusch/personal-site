@@ -15,8 +15,6 @@ class Concentration
 		$this->amount = $amount;
 	}
 
-	
-
 	public function getElement()
 	{
 		return $this->element;
