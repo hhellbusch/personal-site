@@ -43,7 +43,6 @@ var draw = function()
 		}
 	};
 
-	console.log(graphData);
 	$.plot($('#theGraph'), graphData, options);
 	// var previousPoint = null;
 	// $('#theGraph').bind('plothover', function (event, pos, item) 

@@ -10,3 +10,8 @@ img {
 	width:auto;
 	display:inline;
 }
+
+.form-pull-left{
+	float:left;
+	margin-left: 10px;
+}
