@@ -6,6 +6,7 @@ use colossus\ritprem\Mesh;
 use colossus\ritprem\Concentration;
 use colossus\ritprem\GridPoint;
 use colossus\ritprem\Element;
+use \RuntimeException;
 
 class Mesh1D extends Mesh
 {
@@ -13,6 +14,7 @@ class Mesh1D extends Mesh
 	private $x;
 	private $dx;
 	private $uniqueElements;
+	private $maxDiffusivitity;
 
 	public function __construct($x, $dx, $baseConcentration = null)
 	{
@@ -30,7 +32,45 @@ class Mesh1D extends Mesh
 			}
 			$this->addBaseConc($baseConcentration);
 		}
+	}
 
+	public function getMaxDiffusivity($model = 'constant', $temperature)
+	{
+		if (is_null($this->maxDiffusivitity))
+		{
+			$constantModel = false;
+			if ($model == 'constant') $constantModel = true;
+			$diffusivities = array();
+			foreach ($this->gridPoints as $gridPoint)
+			{
+				foreach ($gridPoint->getDopants() as $dopant)
+				{
+					$diffusivities[] = $dopant->getDiffusivity($temperature, $model);
+					if ($constantModel) break;
+				}
+			}
+			$this->maxDiffusivitity = max($diffusivities);
+		}
+		return $this->maxDiffusivitity;
+	}
+
+	public function prepareForNewTimeIncrement()
+	{
+		$this->maxDiffusivitity = null;
+	}
+
+
+
+	public function setGridPoint($i,GridPoint $gridPoint)
+	{
+		if ($i >= 0 && $i < count($this->gridPoints))
+		{	
+			$this->gridPoints[$i] = $gridPoint;
+		}
+		else
+		{
+			throw new RuntimeException("Index out of bounds");
+		}
 	}
 
 	public function addBaseConc(Concentration $concentration)
@@ -119,6 +159,11 @@ class Mesh1D extends Mesh
 
 	public function unshift(GridPoint $newPoint)
 	{
+		$dopants = $newPoint->getDopants();
+		foreach ($dopants as $dopant)
+		{
+			$this->addUniqueElement($dopant->getElement());
+		}
 		array_unshift($this->gridPoints, $newPoint);
 	}
 
@@ -215,7 +260,11 @@ class Mesh1D extends Mesh
 			$runningSum = $runningSum + ($gridPoint->calcMobility() * $this->getDx_cm() * $gridPoint->getDominateDopingConc());
 		}
 		$runningSum = $runningSum * ELECTRON_CHARGE;
-		return 1 / $runningSum;
+		
+		$sheetResistance = 'unknown';
+		if ($runningSum > 0)
+			$sheetResistance = 1 / $runningSum;
+		return $sheetResistance;
 	}
 
 }

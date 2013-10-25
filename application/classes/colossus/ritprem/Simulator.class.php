@@ -6,6 +6,7 @@ use colossus\ritprem\Mesh;
 use colossus\ritprem\Concentration;
 use colossus\ritprem\ElementFactory;
 use colossus\ritprem\Element;
+use \RuntimeException;
 
 class Simulator
 {
@@ -17,17 +18,12 @@ class Simulator
 	
 	public function __construct()
 	{
-
+		$this->setDiffusitivyModel('constant');
 	}
 
 	public function setMesh(Mesh $mesh)
 	{
 		$this->mesh = clone $mesh;
-	}
-
-	public function simulate()
-	{
-
 	}
 
 	public function setTemperature($temp) 
@@ -47,19 +43,9 @@ class Simulator
 
 	private function calcDt()
 	{
-		$elements = $this->mesh->getUniqueElements();
 		$dx = $this->mesh->getDx();
 		$dx_cm = $dx * 1E-4;
-		$maxDiffusivity = null;
-
-		foreach ($elements as $element)
-		{
-			$diffusivity = $element->getDiffusivity($this->temperature);
-			if (is_null($maxDiffusivity)) $maxDiffusivity = $diffusivity;
-			if ($maxDiffusivity < $diffusivity)
-				$maxDiffusivity = $diffusivity;
-		}
-
+		$maxDiffusivity = $this->mesh->getMaxDiffusivity($this->modelType, $this->temperature);
 		
 		$max_dt = pow($dx_cm, 2) / (2 * $maxDiffusivity);
 
@@ -67,13 +53,13 @@ class Simulator
 		//forces a finer time increment - produces a better graph
 		if ($n < 10)
 		{
-			$n = ciel($this->curation/($max_dt/2));
+			$n = ceil($this->duration/($max_dt/2));
 		}
 		$dt = $this->duration / $n;
 		return $dt;
 	}
 
-	public function consantSurfaceSource(Concentration $surfaceConcentration)
+	public function consantSurfaceSourceDiffuse(Concentration $surfaceConcentration)
 	{
 		$elemFactory = new ElementFactory();
 		$topGridPoint = $this->mesh->shift();
@@ -81,26 +67,22 @@ class Simulator
 		$surfaceGridPoint = clone $topGridPoint;
 		$surfaceGridPoint->addDopant($surfaceConcentration);
 		$dx = $this->mesh->getDx();
-		$zeroConc = new Concentration($surfaceConcentration->getElement(), 0);
-		$this->mesh->addBaseConc($zeroConc);
-	
-		$dt = $this->calcDt();
-		
-		for ($currentTime = 0; $currentTime < $this->duration; $currentTime += $dt)
+		$currentTime = 0;
+
+		while($currentTime < $this->duration)
 		{
+			$this->mesh->unshift($surfaceGridPoint);
+			$dt = $this->calcDt();
 			$previousMesh = clone $this->mesh;
-			$newMesh = new Mesh1D($this->mesh->getX(), $this->mesh->getDx());
-			$newMesh->setUniqueElements($previousMesh->getUniqueElements());
-			$previousMesh->unshift($surfaceGridPoint);
 			$previousGridPoints = $previousMesh->getGridPoints();
 			$numGridPoints = count ($previousGridPoints);
 			for ($index = 0; $index < $numGridPoints; $index++)
 			{
-				$newGridPoint = $this->diffuseDopantsAtIndex($previousGridPoints, $index, $dt, $dx);
-				$newMesh->push($newGridPoint);
+				$this->diffuseDopantsAtIndex($previousGridPoints, $index, $dt, $dx);
 			}
-			$newMesh->shift();
-			$this->mesh = clone $newMesh;
+			$this->mesh->shift();
+			$this->mesh->prepareForNewTimeIncrement();
+			$currentTime += $dt;
 		}
 	}
 
@@ -113,21 +95,17 @@ class Simulator
 		{
 			$CI->benchmark->mark('diffuse_loop_'.$currentTime.'_start');
 			$previousMesh = clone $this->mesh;
-			$newMesh = new Mesh1D($this->mesh->getX(), $this->mesh->getDx());
-			$newMesh->setUniqueElements($previousMesh->getUniqueElements());
 			$previousGridPoints = $previousMesh->getGridPoints();
+			
 			$numGridPoints = count ($previousGridPoints);
 			for ($index = 0; $index < $numGridPoints; $index++)
 			{
-				$newGridPoint = $this->diffuseDopantsAtIndex($previousGridPoints, $index, $dt, $dx);
-				$newMesh->push($newGridPoint);
+				$this->diffuseDopantsAtIndex($previousGridPoints, $index, $dt, $dx);
 			}
-			$this->mesh = clone $newMesh;
-			$CI->benchmark->mark('diffuse_loop_'.$currentTime.'_end');
 		}
 	}
 
-	private function diffuseDopantsAtIndex($previousGridPoints, $i, $dt, $dx)
+	private function diffuseDopantsAtIndex(&$previousGridPoints, $i, $dt, $dx)
 	{
 		$dx_cm = $dx * 1E-4;
 		$previousGridPoint = $previousGridPoints[$i];
@@ -142,31 +120,94 @@ class Simulator
 		{
 			$rightPoint = $previousGridPoints[$i + 1];
 		}
+
 		
 		$rightDopants = $rightPoint->getDopants();
 		$leftDopants = $leftPoint->getDopants();
-		
+
 		//for each dopant at each point
 		$newGridPoint = new GridPoint();
+		$dopants = array_merge($dopants, $rightDopants, $leftDopants);
 		foreach ($dopants as $dopantKey => $dopant)
 		{
 			//new conc = previous conc + D * dt / dx^2 * (neighborConc - 2* prevConc - otherNeighborConc)
 			$previousConc = $dopant->getConcentration();
-			$changeCoef = $dopant->getElement()->getDiffusivity($this->temperature) * $dt / pow($dx_cm, 2);
+			$diffusivity = $dopant->getDiffusivity($this->temperature, $this->modelType);
 			
-			$leftCoef = $leftDopants[$dopantKey]->getConcentration();
-			$rightCoef = $rightDopants[$dopantKey]->getConcentration();
-			$newConc = $previousConc + $changeCoef * ($leftCoef + $rightCoef - 2 * $previousConc);
+			$validValue =  pow($dx_cm,2)/(2*$diffusivity); // must be less than dt
+			$valid = ($dt <= $validValue);
+			if (!$valid)
+			{
+				//trigger_error('model is borked.  write code to handle this!');
+			}
+			$changeCoef = $diffusivity * $dt / pow($dx_cm, 2);
+			$leftConc = 0;
+			$rightConc = 0;
+			if (isset($leftDopants[$dopantKey]))
+			{
+				$leftConc = $leftDopants[$dopantKey]->getConcentration();
+			}
+			if (isset($rightDopants[$dopantKey]))
+			{
+				$rightConc = $rightDopants[$dopantKey]->getConcentration();
+			}
+			$newConc = $previousConc + $changeCoef * ($leftConc + $rightConc - 2 * $previousConc);
+			if ($newConc < 0)
+			{
+				$data = array(
+					'previousConc' => $previousConc,
+					'rightConc' => $rightConc,
+					'leftConc' => $leftConc,
+					'diffusivity' => $diffusivity,
+					'changeCoef' => $changeCoef,
+					'temperature' => $this->temperature,
+					'modelType' => $this->modelType,
+					'dt' => $dt,
+					'validValue' => $validValue,
+					'valid' => $valid,
+					'dx_cm' => $dx_cm,
+					'newConc' => $newConc,
+					'dopant' => $dopantKey,
+					'index' => $i
+				);
+				
+				echo 'woops negative concentration?  this is a bug.';
+				echo ' please email hhellbusch@gmail.com';
+				echo ' with detailed steps to reproduce (what the inputs were)';
+				echo ' and the data outputted below.';
+				var_dump($data);
+				exit;
+			}
 			$newConcObj = new Concentration($dopant->getElement(), $newConc);
 			
 			$newGridPoint->addDopant($newConcObj);
 		}
-		return $newGridPoint;
+		if ($this->modelType == 'fermi')
+		{
+			// echo '------'.$i;
+			// var_dump($newGridPoint);
+		}
+		
+		
+		
+		$this->mesh->setGridPoint($i, $newGridPoint);
 	}
 
-	public function setDiffusitivy()
+	public function setDiffusitivyModel($model = 'constant')
 	{
-		
+		$whiteList = array(
+			'constant',
+			'fermi'
+		);
+		if (in_array($model, $whiteList))
+		{
+			$this->modelType = $model;
+		}
+		else
+		{
+			throw new RuntimeException("Unable to set diffuseion model to " . $model);
+		}
+
 	}
 
 

@@ -165,6 +165,13 @@ if (!isset($dopants))
 				</div>
 				
 			</div>
+			<div class='form-pull-left'>
+				<div><label>Model</label></div>
+				<select name="constantSourceModel">
+					<option value='constant'>Constant Diffusivity</option>
+					<option value='fermi'>Fermi</option>
+				</select>
+			</div>
 
 			<div class='clearfix'></div>
 		</div>

@@ -3,6 +3,7 @@
 namespace colossus\ritprem;
 
 use colossus\ritprem\Element;
+use \RuntimeException;
 
 class Concentration
 {
@@ -13,6 +14,10 @@ class Concentration
 	{
 		$this->element = $element;
 		$this->amount = $amount;
+		if ($this->amount < 0)
+		{
+			throw new RuntimeException("Concentration cannot be negative!");
+		}
 	}
 
 	public function getElement()
@@ -71,6 +76,8 @@ class Concentration
 		$c_s    = $mobilityParams['c_s'];
 		$alpha  = $mobilityParams['alpha'];
 		$beta   = $mobilityParams['beta'];
+		//if ($this->amount == 0) return 0;
+		
 		if ($this->element->isDonor())
 		{
 			$mobility = $mu_0 
@@ -88,7 +95,32 @@ class Concentration
 		{
 			throw new Exception("i dont know how to calculate the mobility for this element!");
 		}
+		
 		return $mobility;
+	}
+
+	public function getDiffusivity($temperature, $model = 'constant')
+	{
+		$diffusitivy = 0;
+		if ($model == 'constant')
+		{
+
+			$diffusitivy = $this->element->getDiffusivity($temperature);
+		}
+		elseif ($model == 'fermi')
+		{
+			$diffusitivy = ($this->calcMobility() * BOLTZMANN * $temperature
+				* exp(
+					-1 * $this->element->getActivationEnergy() 
+					/ (BOLTZMANN * $temperature)
+				)
+			);
+		}
+		else
+		{
+			throw new RuntimeException("diffusitivy model {" . $model . '} is not defined');
+		}
+		return $diffusitivy;
 	}
 }
 

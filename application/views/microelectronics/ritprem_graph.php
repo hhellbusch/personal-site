@@ -21,6 +21,7 @@ $this->load->view('microelectronics/header', $headerData);
 
 <div class="graphPlaceholder" id="theGraph" style="width:1018;height:550px;"></div>
 <div id="legendContainer"></div>
+
 <table>
 	<tr>
 		<td class='text-right'>Junction Depth:</td> 

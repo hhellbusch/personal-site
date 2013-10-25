@@ -3,6 +3,7 @@ if (!function_exists("round_sig_figs"))
 {
 	function round_sig_figs($number, $sigdigs)
 	{
+		if(!is_numeric($number))  return '';
 		$multiplier = 1; 
 		while ($number < 0.1) { 
 			$number *= 10; 

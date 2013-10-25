@@ -66,7 +66,7 @@ class Ritprem extends CI_Controller
 		$this->load->helper('url');
 		$this->load->helper('math');
 
-		//ini_set('xdebug.var_display_max_depth', '10');
+		ini_set('xdebug.var_display_max_depth', '10');
 		//ini_set('xdebug.var_display_max_children', 1E10);
 		$this->output->enable_profiler(TRUE);
 	}
@@ -113,7 +113,6 @@ class Ritprem extends CI_Controller
 
 			$sim = new Simulator();
 			$sim->setMesh($mesh);
-			$sim->setDiffusitivy('constant');
 			$temp = $input['constSourceTemp'] + 273;
 			$sim->setTemperature($temp);
 			$duration = $input['constSourceTime'];
@@ -122,7 +121,8 @@ class Ritprem extends CI_Controller
 			$elemOfInterest = $surfaceElement->getFullName();
 			$constConcentration = $input['constSourceConcBase'] * pow(10, $input['constSourceConcPower']);
 			$surface = new Concentration($surfaceElement, $constConcentration);
-			$sim->consantSurfaceSource($surface);
+			$sim->setDiffusitivyModel($input['constantSourceModel']);
+			$sim->consantSurfaceSourceDiffuse($surface);
 			$outputMesh = $sim->getMesh();
 		}
 		else
@@ -138,6 +138,7 @@ class Ritprem extends CI_Controller
 			{
 				$this->benchmark->mark('diffuse_'.$i.'_start');
 				$sim = new Simulator();
+				$sim->setDiffusitivyModel($input['diffuseModel'][$i]);
 				$temp = $input['diffuseTemp'][$i] + 273;
 				$duration = $input['diffuseTime'][$i];
 				$sim->setMesh($outputMesh);
@@ -159,53 +160,5 @@ class Ritprem extends CI_Controller
 		);
 		$this->load->view('microelectronics/ritprem_graph', $viewData);
 	}
-
-	// private function doSimulation()
-	// {
-	// 	$sim = new Simulator();
-	// 	$baseConc = new Concentration($this->elemFactory->getElement('B'), 1E15);
-	// 	$mesh = new Mesh1D(1.5, 0.01, $baseConc);
-	// 	$sim->setMesh($mesh);
-	// 	$sim->setDiffusitivy('constant');
-	// 	$temp = 1000 + 273;
-	// 	$sim->setTemperature($temp);
-	// 	$duration = 60;
-		
-	// 	$sim->setDuration($duration); //seconds
-	// 	$surfaceElement = $this->elemFactory->getElement('As');
-	// 	$surface = new Concentration($surfaceElement, 1E20);
-
-	// 	$sim->consantSurfaceSource($surface);
-
-	// 	echo 'duration: ' . $duration / 60 . ' minutes';
-	// 	echo ' temperature: ' . ($temp - 273) . ' C';
-	// 	return $sim->getMesh()->getFlotData();
-	// }
-
-	// public function implant()
-	// {
-	// 	$flotData = $this->doImplant();
-	// 	$this->load->view('microelectronics/ritprem_graph', array('graphData' => $flotData));
-	// }
-
-	// private function doImplant()
-	// {
-	// 	$baseConc = new Concentration($this->elemFactory->getElement('P'), 1E15);
-	// 	$mesh = new Mesh1D(1.5, 0.01, $baseConc);
-		
-	// 	$specie = $this->elemFactory->getElement('B');
-	// 	$implanter = new Implanter();
-	// 	$implanter->setMesh($mesh);
-	// 	$implanter->setDose(2E15);
-	// 	$implanter->setEnergy(50);
-	// 	$implanter->setElement($specie);
-	// 	$implantedMesh = $implanter->getImplantedMesh();
-	// 	echo 'dose: ' . $mesh->getDose('boron') . "<br />";
-	// 	echo ' xj: ' . round($mesh->getJunctionDepth(), 6);
-		
-		
-	// 	return $implantedMesh->getFlotData();
-	// }
-	
 
 }

@@ -13,10 +13,16 @@
 		Seconds
 	</div>
 	<div class='form-pull-left'>
-		<label> Graph? <input type='checkbox' name='diffuseGraph' /> </label>
+		<select name="diffuseModel[]">
+			<option value='constant'>Constant Diffusivity</option>
+			<option value='fermi'>Fermi</option>
+		</select>
 	</div>
 	<!--<div class='form-pull-left'>
-		<button type="button" class="close remove-diffuse-row" aria-hidden="true">&times;</button>
+		<label> Graph? <input type='checkbox' name='diffuseGraph' /> </label>
 	</div>-->
+	<div class='form-pull-left'>
+		<button type="button" class="close remove-diffuse-row" aria-hidden="true">&times;</button>
+	</div>
 	<div class='clearfix'></div>
 </div>
