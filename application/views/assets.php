@@ -42,9 +42,9 @@ if (isset($additionalJSFiles))
 foreach ($jsFiles as $jsFile)
 {
 ?>
-	<script language="javascript" type="text/javascript" src="<?php echo '/js/' .  $jsFile . '.js'; ?>"></script>
+	<script language="javascript" type="text/javascript" src="<?php echo base_url() . '/js/' .  $jsFile . '.js'; ?>"></script>
 <?php
 }
 ?>
 
-<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/js-src/jquery/flot/excanvas.js"></script><![endif]-->
+<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="<?php echo base_url();  ?>/js-src/jquery/flot/excanvas.js"></script><![endif]-->

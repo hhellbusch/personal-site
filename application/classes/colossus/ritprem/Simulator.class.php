@@ -63,7 +63,12 @@ class Simulator
 		
 		$max_dt = pow($dx_cm, 2) / (2 * $maxDiffusivity);
 
-		$n = ceil($this->duration/$max_dt) + 10; //forces a finer time increment - produces a better graph
+		$n = ceil($this->duration/$max_dt); 
+		//forces a finer time increment - produces a better graph
+		if ($n < 10)
+		{
+			$n = ciel($this->curation/($max_dt/2));
+		}
 		$dt = $this->duration / $n;
 		return $dt;
 	}
@@ -103,9 +108,10 @@ class Simulator
 	{
 		$dx = $this->mesh->getDx();
 		$dt = $this->calcDt();
-
-		for ($currentTime = 0; $currentTime < $this->duration; $currentTime += $dt)
+		$CI =& get_instance();
+		for ($currentTime = 0; $currentTime <= $this->duration; $currentTime += $dt)
 		{
+			$CI->benchmark->mark('diffuse_loop_'.$currentTime.'_start');
 			$previousMesh = clone $this->mesh;
 			$newMesh = new Mesh1D($this->mesh->getX(), $this->mesh->getDx());
 			$newMesh->setUniqueElements($previousMesh->getUniqueElements());
@@ -117,6 +123,7 @@ class Simulator
 				$newMesh->push($newGridPoint);
 			}
 			$this->mesh = clone $newMesh;
+			$CI->benchmark->mark('diffuse_loop_'.$currentTime.'_end');
 		}
 	}
 

@@ -68,6 +68,7 @@ class Ritprem extends CI_Controller
 
 		//ini_set('xdebug.var_display_max_depth', '10');
 		//ini_set('xdebug.var_display_max_children', 1E10);
+		$this->output->enable_profiler(TRUE);
 	}
 	
 	public function index()
@@ -95,7 +96,7 @@ class Ritprem extends CI_Controller
 		$elemOfInterest = '';
 		if ($input['simulationType'] == 'implant')
 		{
-			
+			$this->benchmark->mark('implant_start');
 			$specie = $this->elemFactory->getElement($input['implantDopant']);
 			$elemOfInterest = $specie->getFullName();
 			$implanter = new Implanter();
@@ -105,6 +106,7 @@ class Ritprem extends CI_Controller
 			$implanter->setEnergy($input['implantEnergy']);
 			$implanter->setElement($specie);
 			$outputMesh = $implanter->getImplantedMesh();
+			$this->benchmark->mark('implant_end');
 		}
 		elseif($input['simulationType'] == 'constantSource')
 		{
@@ -134,6 +136,7 @@ class Ritprem extends CI_Controller
 		{
 			for ($i = 0; $i < count($input['diffuseTemp']); $i++)
 			{
+				$this->benchmark->mark('diffuse_'.$i.'_start');
 				$sim = new Simulator();
 				$temp = $input['diffuseTemp'][$i] + 273;
 				$duration = $input['diffuseTime'][$i];
@@ -142,6 +145,7 @@ class Ritprem extends CI_Controller
 				$sim->setDuration($duration); //seconds
 				$sim->diffuse();
 				$outputMesh = $sim->getMesh();
+				$this->benchmark->mark('diffuse_'.$i.'_end');
 			}
 		}
 		
