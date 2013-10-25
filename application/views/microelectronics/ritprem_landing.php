@@ -136,6 +136,21 @@ if (!isset($dopants))
 				</div>
 			</div>
 			<div class='form-pull-left'>
+				<label>Surface Dopant Concentration</label>
+				<div>
+					<input type="number" name="constSourceConcBase" class='form-control' value="1" min="1", step=".1", max="9.9"/>
+					<select name="constSourceConcPower" class="form-control">
+						<?php 
+						for($i = 9; $i < 20; $i++)
+						{
+							echo "<option value='$i'>$i</option>";
+						}
+						?>
+					</select>
+					cm<sup>-3</sup>
+				</div>
+			</div>
+			<div class='form-pull-left'>
 				<label>Temperature</label>
 				<div>
 					<input name="constSourceTemp" type="number" min="600" max="2000" step="50" value="900"/> Celsius 

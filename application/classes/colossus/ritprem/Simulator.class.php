@@ -45,12 +45,23 @@ class Simulator
 		return $this->mesh;
 	}
 
-	private function calcDt($element)
+	private function calcDt()
 	{
+		$elements = $this->mesh->getUniqueElements();
 		$dx = $this->mesh->getDx();
 		$dx_cm = $dx * 1E-4;
-		$diffusivity = $element->getDiffusivity($this->temperature);
-		$max_dt = pow($dx_cm, 2) / (2 * $diffusivity);
+		$maxDiffusivity = null;
+
+		foreach ($elements as $element)
+		{
+			$diffusivity = $element->getDiffusivity($this->temperature);
+			if (is_null($maxDiffusivity)) $maxDiffusivity = $diffusivity;
+			if ($maxDiffusivity < $diffusivity)
+				$maxDiffusivity = $diffusivity;
+		}
+
+		
+		$max_dt = pow($dx_cm, 2) / (2 * $maxDiffusivity);
 
 		$n = ceil($this->duration/$max_dt) + 10; //forces a finer time increment - produces a better graph
 		$dt = $this->duration / $n;
@@ -68,14 +79,13 @@ class Simulator
 		$zeroConc = new Concentration($surfaceConcentration->getElement(), 0);
 		$this->mesh->addBaseConc($zeroConc);
 	
-		$element = $surfaceConcentration->getElement();
-		$dt = $this->calcDt($element);
+		$dt = $this->calcDt();
 		
 		for ($currentTime = 0; $currentTime < $this->duration; $currentTime += $dt)
 		{
 			$previousMesh = clone $this->mesh;
 			$newMesh = new Mesh1D($this->mesh->getX(), $this->mesh->getDx());
-			
+			$newMesh->setUniqueElements($previousMesh->getUniqueElements());
 			$previousMesh->unshift($surfaceGridPoint);
 			$previousGridPoints = $previousMesh->getGridPoints();
 			$numGridPoints = count ($previousGridPoints);
@@ -85,6 +95,27 @@ class Simulator
 				$newMesh->push($newGridPoint);
 			}
 			$newMesh->shift();
+			$this->mesh = clone $newMesh;
+		}
+	}
+
+	public function diffuse()
+	{
+		$dx = $this->mesh->getDx();
+		$dt = $this->calcDt();
+
+		for ($currentTime = 0; $currentTime < $this->duration; $currentTime += $dt)
+		{
+			$previousMesh = clone $this->mesh;
+			$newMesh = new Mesh1D($this->mesh->getX(), $this->mesh->getDx());
+			$newMesh->setUniqueElements($previousMesh->getUniqueElements());
+			$previousGridPoints = $previousMesh->getGridPoints();
+			$numGridPoints = count ($previousGridPoints);
+			for ($index = 0; $index < $numGridPoints; $index++)
+			{
+				$newGridPoint = $this->diffuseDopantsAtIndex($previousGridPoints, $index, $dt, $dx);
+				$newMesh->push($newGridPoint);
+			}
 			$this->mesh = clone $newMesh;
 		}
 	}

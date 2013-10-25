@@ -12,6 +12,7 @@ class Mesh1D extends Mesh
 	private $gridPoints;
 	private $x;
 	private $dx;
+	private $uniqueElements;
 
 	public function __construct($x, $dx, $baseConcentration = null)
 	{
@@ -20,6 +21,7 @@ class Mesh1D extends Mesh
 
 		$numPoints = $x / $dx;
 		$this->gridPoints = array();
+		$this->uniqueElements = array();
 		if (!is_null($baseConcentration))
 		{
 			for ($i = 0; $i < $numPoints; $i++)
@@ -28,14 +30,31 @@ class Mesh1D extends Mesh
 			}
 			$this->addBaseConc($baseConcentration);
 		}
+
 	}
 
 	public function addBaseConc(Concentration $concentration)
 	{
+		$this->addUniqueElement($concentration->getElement());
 		for ($i = 0; $i < count($this->gridPoints); $i++)
 		{
 			$this->gridPoints[$i]->addDopant($concentration);
 		}
+	}
+
+	public function addUniqueElement(Element $element)
+	{
+		$this->uniqueElements[$element->getFullName()] = $element;
+	}
+
+	public function getUniqueElements()
+	{
+		return $this->uniqueElements;
+	}
+
+	public function setUniqueElements(array $uniqueElements)
+	{
+		$this->uniqueElements = $uniqueElements;
 	}
 
 	/**
@@ -183,6 +202,20 @@ class Mesh1D extends Mesh
 			$previousGridPoint = $gridPoint;
 		}
 		return 'unknown';
+	}
+
+	public function getSheetResistance()
+	{
+		$xj = $this->getJunctionDepth();
+		$sumDepth = ceil($xj / $this->dx);
+		$runningSum = 0;
+		for ($i = 0; $i < $sumDepth; $i++)
+		{
+			$gridPoint = $this->gridPoints[$i];
+			$runningSum = $runningSum + ($gridPoint->calcMobility() * $this->getDx_cm() * $gridPoint->getDominateDopingConc());
+		}
+		$runningSum = $runningSum * ELECTRON_CHARGE;
+		return 1 / $runningSum;
 	}
 
 }

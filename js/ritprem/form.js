@@ -6,6 +6,11 @@ var onLoad = function()
 		event.preventDefault();
 		/* Act on the event */
 		$('#diffusionRows').append(diffusionStepHTML);
+		$('.close.remove-diffuse-row').on('click', function(event)
+		{
+			//bad style but oh well. traverse up twice and remove the row.
+			$(this).parent().parent().remove();
+		});
 	});
 
 	//handles toggling of radio/implant form inputs

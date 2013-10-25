@@ -58,6 +58,36 @@ class GridPoint
 		return $sum;
 	}
 
+	/**
+	 * assumes the more concentrated dominates.
+	 * @return [type] [description]
+	 */
+	public function calcMobility()
+	{
+		$maxDopant = $this->getDominateDoping();
+		return $maxDopant->calcMobility();
+	}
+
+	public function getDominateDoping()
+	{
+		$maxDopant = null;
+		foreach ($this->dopants as $dopant)
+		{
+			if (is_null($maxDopant)) $maxDopant = $dopant;
+			if ($dopant->getAmount() >= $maxDopant->getAmount())
+			{
+				$maxDopant = $dopant;
+			}
+		}
+		return $maxDopant;
+	}
+
+	public function getDominateDopingConc()
+	{
+		$maxDopant = $this->getDominateDoping();
+		return $maxDopant->getConcentration();
+	}
+
 }
 
 ?>

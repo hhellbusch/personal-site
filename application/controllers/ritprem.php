@@ -33,8 +33,9 @@
  * 	Will Abisalih, Nicholas Edwards
  *
  * number of beers consumed while programming this:
- * 	Henry : 8
- * 	Nate  : 1
+ * 	Henry : 9
+ * 	Nate  : 3
+ * 	Nick  : 1
  *
  * number of wines consumed while programming this:
  * 	Nate  : 1
@@ -63,9 +64,10 @@ class Ritprem extends CI_Controller
 		$this->load->helper('html');
 		$this->load->helper('form');
 		$this->load->helper('url');
+		$this->load->helper('math');
 
-		ini_set('xdebug.var_display_max_depth', '10');
-		ini_set('xdebug.var_display_max_children', 1E10);
+		//ini_set('xdebug.var_display_max_depth', '10');
+		//ini_set('xdebug.var_display_max_children', 1E10);
 	}
 	
 	public function index()
@@ -84,16 +86,18 @@ class Ritprem extends CI_Controller
 	{
 		$input = $this->input->post();
 		if ($input === FALSE) redirect('ritprem');
-		var_dump($input);
 		//use user input to run a simulation
 		
 		$backgroundConc = $input['backgroundBase'] * pow(10, $input['backgroundPower']);
 		$backgroundDopant = new Concentration($this->elemFactory->getElement($input['backgroundDopant']), $backgroundConc);
 		$mesh = new Mesh1D($input['depth'], $input['spacing'], $backgroundDopant);
 		$outputMesh = null;
+		$elemOfInterest = '';
 		if ($input['simulationType'] == 'implant')
 		{
+			
 			$specie = $this->elemFactory->getElement($input['implantDopant']);
+			$elemOfInterest = $specie->getFullName();
 			$implanter = new Implanter();
 			$implanter->setMesh($mesh);
 			$implantDose = $input['implantDose'] * pow(10, $input['implantDosePower']);
@@ -104,6 +108,8 @@ class Ritprem extends CI_Controller
 		}
 		elseif($input['simulationType'] == 'constantSource')
 		{
+
+			$sim = new Simulator();
 			$sim->setMesh($mesh);
 			$sim->setDiffusitivy('constant');
 			$temp = $input['constSourceTemp'] + 273;
@@ -111,6 +117,7 @@ class Ritprem extends CI_Controller
 			$duration = $input['constSourceTime'];
 			$sim->setDuration($duration); //seconds
 			$surfaceElement = $this->elemFactory->getElement($input['constSourceDopant']);
+			$elemOfInterest = $surfaceElement->getFullName();
 			$constConcentration = $input['constSourceConcBase'] * pow(10, $input['constSourceConcPower']);
 			$surface = new Concentration($surfaceElement, $constConcentration);
 			$sim->consantSurfaceSource($surface);
@@ -122,9 +129,31 @@ class Ritprem extends CI_Controller
 				. 'detailed steps to reproduce and send them to hhellbusch@gmail.com';
 			return;
 		}
+
+		if (isset($input['diffuseTemp']))
+		{
+			for ($i = 0; $i < count($input['diffuseTemp']); $i++)
+			{
+				$sim = new Simulator();
+				$temp = $input['diffuseTemp'][$i] + 273;
+				$duration = $input['diffuseTime'][$i];
+				$sim->setMesh($outputMesh);
+				$sim->setTemperature($temp);
+				$sim->setDuration($duration); //seconds
+				$sim->diffuse();
+				$outputMesh = $sim->getMesh();
+			}
+		}
 		
+
 		$flotData = $outputMesh->getFlotData();
-		$this->load->view('microelectronics/ritprem_graph', array('graphData' => $flotData));
+		$viewData = array(
+			'graphData' => $flotData,
+			'xj' => $outputMesh->getJunctionDepth(),
+			'dose' => $outputMesh->getDose($elemOfInterest),
+			'sheetResistance' => $outputMesh->getSheetResistance()
+		);
+		$this->load->view('microelectronics/ritprem_graph', $viewData);
 	}
 
 	// private function doSimulation()

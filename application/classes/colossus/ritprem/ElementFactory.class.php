@@ -30,6 +30,16 @@ class ElementFactory
 				return 53.789*pow($energy, 0.8862);
 			}
 		);
+		$boron->setMobilityParams(array(
+			'mu_0' => 44.9,
+			'mu_max' => 470.5,
+			'mu_1' => 29,
+			'c_r' => 2.23e17,
+			'c_s' => 6.1e20,
+			'alpha' => 0.719,
+			'beta' => 2,
+			'p_c' => 9.23e16
+		));
 		
 
 		$phosphorus = new Element();
@@ -50,6 +60,16 @@ class ElementFactory
 				return -0.0016*pow($energy, 2)+13.199*$energy+36.045;
 			}
 		);
+		$phosphorus->setMobilityParams(array(
+			'mu_0' => 68.5,
+			'mu_max' => 1414,
+			'mu_1' => 56.1,
+			'c_r' => 9.2e16,
+			'c_s' => 3.41e20,
+			'alpha' => 0.711,
+			'beta' => 1.98
+		));
+		
 
 		$arsenic = new Element();
 		$arsenic->setFullName('arsenic');
@@ -69,6 +89,15 @@ class ElementFactory
 				return 18.693*pow($energy,0.787);
 			}
 		);
+		$arsenic->setMobilityParams(array(
+			'mu_0' => 52.2,
+			'mu_max' => 1417,
+			'mu_1' => 43.4,
+			'c_r' => 9.68e16,
+			'c_s' => 3.43e20,
+			'alpha' => 0.68,
+			'beta' => 2
+		));
 
 		$this->lookupTable = array(
 			'B' => $boron,

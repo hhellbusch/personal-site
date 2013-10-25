@@ -13,10 +13,21 @@ class Element
 	private $diffusionCoef;
 	private $activationEnergy;
 	private $dopantType;
+	private $mobilityParams;
 
 	public function __construct()
 	{
 
+	}
+
+	public function setMobilityParams($mobilityParams)
+	{
+		$this->mobilityParams = $mobilityParams;
+	}
+
+	public function getMobilityParams()
+	{
+		return $this->mobilityParams;
 	}
 
 	public function equal(Element $other)
@@ -126,6 +137,8 @@ class Element
 	{
 		$this->calcProjectedRange = $func;
 	}
+
+	
 
 }
 

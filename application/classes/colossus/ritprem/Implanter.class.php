@@ -88,6 +88,7 @@ class Implanter
 			$conc = new Concentration($this->element, $amount);
 			$gridPoints[$i]->addDopant($conc); 
 		}
+		$this->mesh->addUniqueElement($this->element);
 		return $this->mesh;
 	}
 
