@@ -15,10 +15,6 @@ class Concentration
 	{
 		$this->element = $element;
 		$this->amount = $amount;
-		if ($this->amount < 0)
-		{
-			throw new RuntimeException("Concentration cannot be negative!");
-		}
 	}
 
 	public function getElement()
@@ -59,11 +55,6 @@ class Concentration
 	public function setConcentration($amount)
 	{
 		$this->amount = $amount;
-	}
-
-	public function subtract($amount)
-	{
-		$this->amount -= $amount;
 	}
 
 	public function calcMobility()
@@ -108,23 +99,26 @@ class Concentration
 
 			$diffusitivy = $this->element->getDiffusivity($temperature);
 		}
-		elseif ($model == 'fermi')
+		elseif ($model == 'nate')
 		{
 			// D = D_0 * exp(-Ea/kT)
 			// D_0 = \mu * k_b * T (einstien relation)
-			// $diffusitivy = ($this->calcMobility() * BOLTZMANN * $temperature
-			// 	* exp(
-			// 		-1 * $this->element->getActivationEnergy() 
-			// 		/ (BOLTZMANN * $temperature)
-			// 	)
-			// );
+			$diffusitivy = ($this->calcMobility() * BOLTZMANN * $temperature
+				* exp(
+					-1 * $this->element->getActivationEnergy() 
+					/ (BOLTZMANN * $temperature)
+				)
+			);
+			
+		}
+		elseif($model == 'fermi')
+		{
 			$ni = $this->calcIntrinsicCarrierConc($temperature);
 			$fermiParams = $this->element->getFermiDiffusivityParams();
 			$d0      = $fermiParams['d0_0']      * exp(-1 * $fermiParams['d0_e']      / (BOLTZMANN * $temperature));
 			$dsingle = $fermiParams['dsingle_0'] * exp(-1 * $fermiParams['dsingle_e'] / (BOLTZMANN * $temperature));
 			$ddouble = $fermiParams['ddouble_0'] * exp(-1 * $fermiParams['ddouble_e'] / (BOLTZMANN * $temperature));
-			$effDiffusitivy = $d0 + ($dsingle * $this->amount / $ni) + ($ddouble * pow($this->amount / $ni, 2));
-			return $effDiffusitivy;
+			$diffusitivy = $d0 + ($dsingle * $this->amount / $ni) + ($ddouble * pow($this->amount / $ni, 2));
 		}
 		else
 		{

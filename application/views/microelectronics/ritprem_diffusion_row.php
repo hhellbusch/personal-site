@@ -15,7 +15,8 @@
 	<div class='form-pull-left'>
 		<select class='form-control' name="diffuseModel[]">
 			<option value='constant'>Constant Diffusivity</option>
-			<option value='fermi'>Fermi</option>
+			<option value='fermi'>"Plummer" Fermi</option>
+			<option value='nate'>"Nate" Fermi</option>
 		</select>
 	</div>
 	<!--<div class='form-pull-left'>

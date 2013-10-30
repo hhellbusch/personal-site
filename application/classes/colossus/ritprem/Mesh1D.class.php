@@ -121,6 +121,30 @@ class Mesh1D extends Mesh
 		}
 	}
 
+	public function addDopantToGridPoint($i, Concentration $conc)
+	{
+		if ($i >= 0 && $i < count($this->gridPoints))
+		{	
+			$this->gridPoints[$i]->addDopant($conc);
+		}
+		else
+		{
+			var_dump($i);
+			var_dump(count($this->gridPoints));
+			throw new RuntimeException("Index out of bounds");
+		}
+	}
+
+	public function getDopantAtGridPoint($i, $dopantKey)
+	{
+		$amount = 'n/a';
+		if ($i >= 0 && $i < count($this->gridPoints))
+		{	
+			$amount = $this->gridPoints[$i]->getAmountOfDopant($dopantKey);
+		}
+		return $amount;
+	}
+
 	public function addBaseConc(Concentration $concentration)
 	{
 		$this->addUniqueElement($concentration->getElement());
@@ -236,6 +260,8 @@ class Mesh1D extends Mesh
 	{
 		return $this->gridPoints;
 	}
+
+
 
 	public function unshift(GridPoint $newPoint)
 	{

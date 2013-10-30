@@ -102,7 +102,7 @@ class Simulator
 			$previousGridPoints = $previousMesh->getGridPoints();
 			
 			$numGridPoints = count ($previousGridPoints);
-			for ($index = 0; $index < $numGridPoints; $index++)
+			for ($index = $numGridPoints - 1; $index >= 0; $index--)
 			{
 				$this->currentTime = $currentTime;
 				$this->diffuseDopantsAtIndex($previousGridPoints, $index, $dt, $dx, $currentTime);
@@ -110,6 +110,7 @@ class Simulator
 			$this->mesh->prepareForNewTimeIncrement();
 			$currentTime += $dt;
 			$loopCount++;
+			//if ($loopCount == 10) break;
 			log_message('debug','t:'.$currentTime);
 		}
 	}
@@ -123,6 +124,7 @@ class Simulator
 		if (isset($gridPoints[$i - 1]))
 		{
 			$leftPoint = $gridPoints[$i -1];
+
 		}
 		$rightPoint = $gridPoint;
 		if (isset($gridPoints[$i + 1]))
@@ -138,14 +140,18 @@ class Simulator
 		$newGridPoint = new GridPoint();
 		$newGridPoint->setTime($currentTime);
 		$newGridPoint->setMaterial($gridPoint->getMaterial());
-		$dopantKeys = array();
-		$dopantKeys += array_keys($rightDopants);
-		$dopantKeys += array_keys($leftDopants);
-		
-		foreach ($dopantKeys as $dopantKey)
+		$dopants = array_merge($dopants, $rightDopants, $leftDopants);
+		//log_message('debug', "diffusing at gridpoint " . $i );
+		if (
+			!(
+				$leftPoint->getTime() == $gridPoint->getTime() 
+				&& $rightPoint->getTime() == $gridPoint->getTime()
+			)
+		) {
+			throw new Exception("times dont match??");
+		}
+		foreach ($dopants as $dopantKey => $dopant)
 		{
-			if (!isset($dopants[$dopantKey])) break;
-			$dopant = $dopants[$dopantKey];
 			$previousConc = $dopant->getConcentration();
 			$diffusivity = $dopant->getDiffusivity($this->temperature, $this->modelType);
 			$rightDiffusivity = $diffusivity;
@@ -158,11 +164,12 @@ class Simulator
 			if (isset($leftDopants[$dopantKey]))
 			{
 				$leftConc = $leftDopants[$dopantKey]->getConcentration();
+				//$leftDiffusivity = $leftDopants[$dopantKey]->getDiffusivity($this->temperature, $this->modelType);
 			}
-
 			if (isset($rightDopants[$dopantKey]))
 			{
 				$rightConc = $rightDopants[$dopantKey]->getConcentration();
+				//$rightDiffusivity = $rightDopants[$dopantKey]->getDiffusivity($this->temperature, $this->modelType);
 			}
 
 			//determine the parts of the new conc
@@ -187,106 +194,63 @@ class Simulator
 				$leftConcDiff = $previousConc / $leftSegregation - $leftConc;
 			}
 
-			$dopantMovingFromLeft = ($leftChangeCoef * $leftConcDiff);
-			$dopantMovingFromRight = ($rightChangeCoef * $rightConcDiff);
-			$addToCurrent = 0;
-
-			if (($i + 1) < count($gridPoints))
-			{
-				$right = new Concentration($dopant->getElement(), -1 * $dopantMovingFromRight);
-				$this->mesh->addDopantToGridPoint($i + 1, $right);
-				$addToCurrent = $addToCurrent +  $dopantMovingFromRight;
-			
-			}
-
-			if ($i > 0)
-			{
-				$left = new Concentration($dopant->getElement(), -1 * $dopantMovingFromLeft);
-				$this->mesh->addDopantToGridPoint($i - 1, $left);
-				$addToCurrent = $addToCurrent + $dopantMovingFromLeft;
-				
-			}
-
-			
-			$current = new Concentration($dopant->getElement(), $addToCurrent);
-			$this->mesh->addDopantToGridPoint($i, $current);
-			
-
-			$data = array(
-					'index' => $i,
-					'leftDelta' => $dopantMovingFromLeft,
-					'leftConcOld' => $leftConc,
-					'leftConcNew' => $this->mesh->getDopantAtGridPoint($i - 1, $dopantKey),
-					'rightDelta' => $dopantMovingFromRight,
-					'rightConcOld' => $rightConc,
-					'rightConcNew' => $this->mesh->getDopantAtGridPoint($i + 1, $dopantKey),
-					'changeToCurrent' => $addToCurrent,
-					'currentConcOld' => $previousConc,
-					'currentConcNew' => $this->mesh->getDopantAtGridPoint($i, $dopantKey),
-					'dopant' => $dopantKey
-			);
-			//var_dump($data);
-			
-
-			
-			
+			$newConc = $previousConc + ($rightChangeCoef * $rightConcDiff) + ($leftChangeCoef * $leftConcDiff);
 			
 			if ($diffusivity * $dt / pow($dx, 2) > .5)
 			{
-				var_dump($diffusivity);
-
 				throw new Exception("model went out of bounds!");
 			}
 
 
-			// if ($newConc < 0 || is_infinite($newConc))
-			// {
-			// 	$data = array(
-			// 		'previousConc' => $previousConc,
-			// 		'rightConc' => $rightConc,
-			// 		'leftConc' => $leftConc,
-			// 		'diffusivity' => $diffusivity,
-			// 		'changeCoef' => $changeCoef,
-			// 		'temperature' => $this->temperature,
-			// 		'modelType' => $this->modelType,
-			// 		'dt' => $dt,
-			// 		//'validValue' => $validValue,
-			// 		//'valid' => $valid,
-			// 		'dx_cm' => $dx_cm,
-			// 		'newConc' => $newConc,
-			// 		'dopant' => $dopantKey,
-			// 		'index' => $i,
-			// 		'currentTime' => $this->currentTime
-			// 	);
+			if ($newConc < 0 || is_infinite($newConc))
+			{
+				$data = array(
+					'previousConc' => $previousConc,
+					'rightConc' => $rightConc,
+					'leftConc' => $leftConc,
+					'diffusivity' => $diffusivity,
+					'changeCoef' => $changeCoef,
+					'temperature' => $this->temperature,
+					'modelType' => $this->modelType,
+					'dt' => $dt,
+					//'validValue' => $validValue,
+					//'valid' => $valid,
+					'dx_cm' => $dx_cm,
+					'newConc' => $newConc,
+					'dopant' => $dopantKey,
+					'index' => $i,
+					'currentTime' => $this->currentTime
+				);
 				
 				
-			// 	echo 'woops negative concentration or infinite concentration????  this is a bug.';
-			// 	echo ' please email hhellbusch@gmail.com';
-			// 	echo ' with detailed steps to reproduce (what the inputs were)';
-			// 	echo ' and the data outputted below.';
-			// 	var_dump($data);
+				echo 'woops negative concentration or infinite concentration????  this is a bug.';
+				echo ' please email hhellbusch@gmail.com';
+				echo ' with detailed steps to reproduce (what the inputs were)';
+				echo ' and the data outputted below.';
+				var_dump($data);
 
-			// 	echo 'left point:';
-			// 	var_dump($leftPoint);
-			// 	echo 'current point:';
-			// 	var_dump($previousGridPoint);
-			// 	echo 'right point:';
-			// 	var_dump($rightPoint);
+				echo 'left point:';
+				var_dump($leftPoint);
+				echo 'current point:';
+				var_dump($previousGridPoint);
+				echo 'right point:';
+				var_dump($rightPoint);
 
-			// 	var_dump($rightChangeCoef);
-			// 	var_dump($rightConcDiff);
+				var_dump($rightChangeCoef);
+				var_dump($rightConcDiff);
 
-			// 	var_dump($leftChangeCoef);
-			// 	var_dump($leftConcDiff); 
+				var_dump($leftChangeCoef);
+				var_dump($leftConcDiff); 
 				
-			// 	// var_dump($rightConc/$rightSegregation);
+				// var_dump($rightConc/$rightSegregation);
 
-			// 	exit;
-			// }
+				exit;
+			}
 
-			
+			$newConcObj = new Concentration($dopant->getElement(), $newConc);
+			$newGridPoint->setDopantConcentration($newConcObj);
 		}
-		
+		$this->mesh->setGridPoint($i, $newGridPoint);
 	}
 
 	public function setDiffusitivyModel($model = 'constant')

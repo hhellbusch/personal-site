@@ -69,6 +69,16 @@ class GridPoint
 		return $this->dopants;
 	}
 
+	public function getAmountOfDopant($key)
+	{
+		$amount = 'n/a';
+		if (isset($this->dopants[$key]))
+		{
+			$amount = $this->dopants[$key]->getAmount();
+		}
+		return $amount;
+	}
+
 	public function getAcceptorConc()
 	{
 		$sum = 0;

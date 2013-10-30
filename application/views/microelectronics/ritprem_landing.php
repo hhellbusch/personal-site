@@ -196,7 +196,8 @@ if (strlen($validationErrors) > 0)
 				<div><label>Model</label></div>
 				<select class='form-control' name="constantSourceModel">
 					<option value='constant'>Constant Diffusivity</option>
-					<option value='fermi'>Fermi</option>
+					<option value='fermi'>"Plummer" Fermi</option>
+					<option value='nate'>"Nate" Fermi</option>
 				</select>
 			</div>
 
