@@ -14,11 +14,82 @@ class Element
 	private $activationEnergy;
 	private $dopantType;
 	private $mobilityParams;
+	private $segregationCoef;
+	private $segregation_e;
+	private $transport_e;
+	private $transportCoef;
+	private $fermiDiffusionParams;
 
 	public function __construct()
 	{
 
 	}
+
+	public function setFermiDiffusivityParams($params)
+	{
+		$this->fermiDiffusionParams = $params;
+
+	}
+
+	public function getFermiDiffusivityParams()
+	{
+		return $this->fermiDiffusionParams;
+	}
+
+	public function setSegregationCoef($segregationCoef)
+	{
+		$this->segregationCoef = $segregationCoef;
+	}
+
+	public function setSegregationExponent($segregation_e)
+	{
+		$this->segregation_e = $segregation_e;
+	}
+
+	public function setTransportCoef($transportCoef)
+	{
+		$this->transportCoef = $transportCoef;
+	}
+
+	public function setTransportExponent($transport_e)
+	{
+		$this->transport_e = $transport_e;
+	}
+
+	public function getTransportCoef()
+	{
+		return $this->transportCoef;
+	}
+
+	public function getSegregationCoef()
+	{
+		return $this->segregationCoef;
+	}
+
+	public function getSegregationExponent()
+	{
+		return $this->segregation_e;
+	}
+
+	public function getTransportExponent()
+	{
+		return $this->transport_e;
+	}
+
+	public function getTransport($temperature)
+	{
+		$kt = (BOLTZMANN * $temperature);
+		return $this->getTransportCoef() * exp(-1 * $this->getTransportExponent() / $kt);
+	}
+
+	public function getSegregation($temperature)
+	{
+		$kt = (BOLTZMANN * $temperature);
+		return $this->getSegregationCoef() * exp(-1 * $this->getSegregationExponent() / $kt);
+	}
+
+
+
 
 	public function setMobilityParams($mobilityParams)
 	{

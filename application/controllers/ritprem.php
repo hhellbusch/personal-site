@@ -33,15 +33,18 @@
  * 	Will Abisalih, Nicholas Edwards
  *
  * number of beers consumed while programming this:
- * 	Henry : 9
- * 	Nate  : 3
- * 	Nick  : 1
+ * 	Henry : 11
+ * 	Nate  : 5
+ * 	Nick  : 2
+ * 	Will  : 1
  *
  * number of wines consumed while programming this:
- * 	Nate  : 1
+ * 	Nate  : 2
  *
  * number of whiskeys consumed while programming this:
  * 	Henry : 2
+ *
+ * mkaing bacon pancakessssssssssssssss
  */
 
 use colossus\ritprem\Simulator;
@@ -68,7 +71,7 @@ class Ritprem extends CI_Controller
 
 		ini_set('xdebug.var_display_max_depth', '10');
 		//ini_set('xdebug.var_display_max_children', 1E10);
-		$this->output->enable_profiler(TRUE);
+		//$this->output->enable_profiler(TRUE);
 	}
 	
 	public function index()
@@ -85,13 +88,14 @@ class Ritprem extends CI_Controller
 
 	public function simulate()
 	{
-		$input = $this->input->post();
-		if ($input === FALSE) redirect('ritprem');
+		$input = $this->validateFormInput();
+		if ($input === FALSE) return;
 		//use user input to run a simulation
 		
 		$backgroundConc = $input['backgroundBase'] * pow(10, $input['backgroundPower']);
 		$backgroundDopant = new Concentration($this->elemFactory->getElement($input['backgroundDopant']), $backgroundConc);
 		$mesh = new Mesh1D($input['depth'], $input['spacing'], $backgroundDopant);
+		$mesh->addSurfaceOxide($input['oxideThicknes']);
 		$outputMesh = null;
 		$elemOfInterest = '';
 		if ($input['simulationType'] == 'implant')
@@ -115,7 +119,7 @@ class Ritprem extends CI_Controller
 			$sim->setMesh($mesh);
 			$temp = $input['constSourceTemp'] + 273;
 			$sim->setTemperature($temp);
-			$duration = $input['constSourceTime'];
+			$duration = $input['constSourceTime'] * 60;
 			$sim->setDuration($duration); //seconds
 			$surfaceElement = $this->elemFactory->getElement($input['constSourceDopant']);
 			$elemOfInterest = $surfaceElement->getFullName();
@@ -140,7 +144,7 @@ class Ritprem extends CI_Controller
 				$sim = new Simulator();
 				$sim->setDiffusitivyModel($input['diffuseModel'][$i]);
 				$temp = $input['diffuseTemp'][$i] + 273;
-				$duration = $input['diffuseTime'][$i];
+				$duration = $input['diffuseTime'][$i] * 60;
 				$sim->setMesh($outputMesh);
 				$sim->setTemperature($temp);
 				$sim->setDuration($duration); //seconds
@@ -152,13 +156,140 @@ class Ritprem extends CI_Controller
 		
 
 		$flotData = $outputMesh->getFlotData();
+		$markings = $outputMesh->getFlotMarkings();
 		$viewData = array(
 			'graphData' => $flotData,
-			'xj' => $outputMesh->getJunctionDepth(),
+			'graphMarkings' => $markings,
+			'xj' => $outputMesh->getJunctionDepthRelativeToSiSurface(),
 			'dose' => $outputMesh->getDose($elemOfInterest),
 			'sheetResistance' => $outputMesh->getSheetResistance()
 		);
 		$this->load->view('microelectronics/ritprem_graph', $viewData);
+	}
+
+	private function getFormConfig()
+	{
+		$formConfig = array(
+			array(
+				'field' => 'backgroundBase',
+				'label' => 'Background Concentration Base',
+				'rules' => 'required|numeric|less_than[10]|greater_than[0]'
+			),
+			array(
+				'field' => 'backgroundPower',
+				'label' => 'Background Concnetration Exponent',
+				'rules' => 'required|integer|greater_than[8]|less_than[20]'
+			),
+			array(
+				'field' => 'backgroundDopant',
+				'label' => 'Background Doping Element',
+				'rules' => 'required|alpha'
+			),
+			array(
+				'field' => 'spacing',
+				'label' => 'Grid Size',
+				'rules' => 'required|numeric|greater_than[0.001]'
+			),
+			array(
+				'field' => 'depth',
+				'label' => 'Grid Depth',
+				'rules' => 'required|numeric|less_than[10]'
+			),
+			array(
+				'field' => 'oxideThicknes',
+				'label' => 'Surface Oxide Thickness',
+				'rules' => 'numeric'
+			),
+			array(
+				'field' => 'diffuseTemp[]',
+				'label' => 'Diffusion Step Temperature',
+				'rules' => 'numeric|greater_than[700]|less_than[1200]'
+			),
+			array(
+				'field' => 'diffuseTime[]',
+				'label' => 'Diffusion Step Duration',
+				'rules' => 'numeric|greater_than[0]|less_than[14400]'
+			),
+			array(
+				'field' => 'diffuseModel[]',
+				'label' => 'Diffusion Model',
+				'rules' => 'alpha'
+			)
+		);
+		return $formConfig;
+	}
+
+	private function validateFormInput()
+	{
+		$input = $this->input->post();
+		$formConfig = $this->getFormConfig();
+		$this->load->library('form_validation');
+
+		if ($input['simulationType'] == 'implant')
+		{
+			$formConfig[] = array(
+				'field' => 'implantDopant',
+				'label' => 'Implant Dopant',
+				'rules' => 'required|alpha'
+			);
+			$formConfig[] = array(
+				'field' => 'implantDose',
+				'label' => 'Implant Dose Base',
+				'rules' => 'required|numeric|greater_than[0]|less_than[10]'
+			);
+			$formConfig[] = array(
+				'field' => 'implantDosePower',
+				'label' => 'Implant Dose Exponent',
+				'rules' => 'required|numeric|greater_than[8]|less_than[20]'
+			);
+			$formConfig[] = array(
+				'field' => 'implantEnergy',
+				'label' => 'Implant Energy',
+				'rules' => 'required|numeric|greater_than[9]|less_than[201]'
+			);
+		}
+		elseif($input['simulationType'] == 'constantSource')
+		{
+			$formConfig[] = array(
+				'field' => 'constSourceDopant',
+				'label' => "Constant Source Dopant",
+				'rules' => 'required|alpha'
+			);
+			$formConfig[] = array(
+				'field' => 'constSourceConcBase',
+				'label' => 'Constant Source Concentration Base',
+				'rules' => 'required|numeric|less_than[10]|greater_than[0]'
+			);
+			$formConfig[] = array(
+				'field' => 'constSourceConcPower',
+				'label' => 'Constant Source Concentration Exponent',
+				'rules' => 'required|integer|greater_than[8]|less_than[20]'
+			);
+			$formConfig[] = array(
+				'field' => 'constSourceTemp',
+				'label' => 'Constant Source Temperature',
+				'rules' => 'required|numeric|greater_than[700]|less_than[1200]'
+			);
+			$formConfig[] = array(
+				'field' => 'constSourceTime',
+				'label' => 'Constant Source Duration',
+				'rules' => 'required|numeric|greater_than[0]|less_than[14400]'
+			);
+			$formConfig[] = array(
+				'field' => 'constantSourceModel',
+				'label' => 'Constant Source Model',
+				'rules' => 'required|alpha'
+			);
+		}
+
+		$this->form_validation->set_rules($formConfig);
+
+		if ($this->form_validation->run() === FALSE)
+		{
+			$this->index();
+			return false;
+		}
+		return $input;
 	}
 
 }

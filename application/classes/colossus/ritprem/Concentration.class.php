@@ -4,6 +4,7 @@ namespace colossus\ritprem;
 
 use colossus\ritprem\Element;
 use \RuntimeException;
+use \Exception;
 
 class Concentration
 {
@@ -76,8 +77,8 @@ class Concentration
 		$c_s    = $mobilityParams['c_s'];
 		$alpha  = $mobilityParams['alpha'];
 		$beta   = $mobilityParams['beta'];
-		//if ($this->amount == 0) return 0;
 		
+		if ($this->amount == 0) return 0;
 		if ($this->element->isDonor())
 		{
 			$mobility = $mu_0 
@@ -109,18 +110,35 @@ class Concentration
 		}
 		elseif ($model == 'fermi')
 		{
-			$diffusitivy = ($this->calcMobility() * BOLTZMANN * $temperature
-				* exp(
-					-1 * $this->element->getActivationEnergy() 
-					/ (BOLTZMANN * $temperature)
-				)
-			);
+			// D = D_0 * exp(-Ea/kT)
+			// D_0 = \mu * k_b * T (einstien relation)
+			// $diffusitivy = ($this->calcMobility() * BOLTZMANN * $temperature
+			// 	* exp(
+			// 		-1 * $this->element->getActivationEnergy() 
+			// 		/ (BOLTZMANN * $temperature)
+			// 	)
+			// );
+			$ni = $this->calcIntrinsicCarrierConc($temperature);
+			$fermiParams = $this->element->getFermiDiffusivityParams();
+			$d0      = $fermiParams['d0_0']      * exp(-1 * $fermiParams['d0_e']      / (BOLTZMANN * $temperature));
+			$dsingle = $fermiParams['dsingle_0'] * exp(-1 * $fermiParams['dsingle_e'] / (BOLTZMANN * $temperature));
+			$ddouble = $fermiParams['ddouble_0'] * exp(-1 * $fermiParams['ddouble_e'] / (BOLTZMANN * $temperature));
+			$effDiffusitivy = $d0 + ($dsingle * $this->amount / $ni) + ($ddouble * pow($this->amount / $ni, 2));
+			return $effDiffusitivy;
 		}
 		else
 		{
 			throw new RuntimeException("diffusitivy model {" . $model . '} is not defined');
 		}
 		return $diffusitivy;
+	}
+
+	private function calcIntrinsicCarrierConc($temp)
+	{
+		//http://www.stevesque.com/calculators/intrinsic-carrier-concentration/
+		$a1 = 3.1e16;
+		$a2 = 7000;
+		return $a1 * pow($temp, 3/2) * exp(-1 * $a2 / $temp);
 	}
 }
 

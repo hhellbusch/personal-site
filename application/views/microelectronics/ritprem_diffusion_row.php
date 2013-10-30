@@ -1,19 +1,19 @@
 <div class='form-group'>
 	<div class='form-pull-left'>
 		<label>Temperature
-			<input name="diffuseTemp[]" type="number" min="600" max="2000" step="50" value="900"/> 
+			<input class='form-control' name="diffuseTemp[]" type="text" value="900"/> 
 		</label>
 		Celsius 
 	</div>
 	<div class='form-pull-left'>
 		<label>
 			Duration
-			<input name="diffuseTime[]" type="number" min="0" step="10" value="600"/> 
+			<input class='form-control' name="diffuseTime[]" type="text" value="60"/> 
 		</label>
-		Seconds
+		Minutes
 	</div>
 	<div class='form-pull-left'>
-		<select name="diffuseModel[]">
+		<select class='form-control' name="diffuseModel[]">
 			<option value='constant'>Constant Diffusivity</option>
 			<option value='fermi'>Fermi</option>
 		</select>

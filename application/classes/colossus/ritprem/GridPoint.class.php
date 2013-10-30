@@ -8,21 +8,58 @@ class GridPoint
 {
 	private $dopants = array();
 	private $material;
+	private $time;
 
 	public function __construct()
 	{
 		$this->material = 'silicon';
 	}
 
-	// public function __clone()
-	// {
-	// 	foreach ($this->dopants as $dopant)
-	// 	{
-	// 		$this->dopants[$dopant->getElementName()] = clone $dopant;
-	// 	}
-	// }
+	public function setTime($time)
+	{
+		$this->time = $time;
+	}
+
+	public function getTime()
+	{
+		return $this->time;
+	}
+
+	public function isInterface(GridPoint $gridPoint)
+	{
+		return ($gridPoint->material != $this->material);
+	}
+
+	public function setMaterial($material)
+	{
+		if ($material == 'SiO2' || $material == 'silicon')
+		{
+			$this->material = $material;
+		}
+		else
+		{
+			throw new RuntimeException("can't set material to " . $material . " because it isn't defined");
+		}
+	}
+
+	public function getMaterial()
+	{
+		return $this->material;
+	}
 
 	public function addDopant(Concentration $concentration)
+	{
+		if (isset($this->dopants[$concentration->getElementName()]))
+		{
+			$this->dopants[$concentration->getElementName()]->add($concentration->getAmount());
+		}
+		else
+		{
+			$this->dopants[$concentration->getElementName()] = clone $concentration; 
+		}
+	}
+
+	public function setDopantConcentration(Concentration $concentration)
 	{
 		$this->dopants[$concentration->getElementName()] = clone $concentration; 
 	}

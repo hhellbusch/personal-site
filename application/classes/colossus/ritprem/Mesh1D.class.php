@@ -7,6 +7,7 @@ use colossus\ritprem\Concentration;
 use colossus\ritprem\GridPoint;
 use colossus\ritprem\Element;
 use \RuntimeException;
+use \Exception;
 
 class Mesh1D extends Mesh
 {
@@ -15,6 +16,8 @@ class Mesh1D extends Mesh
 	private $dx;
 	private $uniqueElements;
 	private $maxDiffusivitity;
+	private $numOxidePoints;
+	private $maxTransport;
 
 	public function __construct($x, $dx, $baseConcentration = null)
 	{
@@ -32,6 +35,7 @@ class Mesh1D extends Mesh
 			}
 			$this->addBaseConc($baseConcentration);
 		}
+		$this->numOxidePoints = 0;
 	}
 
 	public function getMaxDiffusivity($model = 'constant', $temperature)
@@ -45,7 +49,14 @@ class Mesh1D extends Mesh
 			{
 				foreach ($gridPoint->getDopants() as $dopant)
 				{
-					$diffusivities[] = $dopant->getDiffusivity($temperature, $model);
+					try
+					{ 
+						$diffusivities[] = $dopant->getDiffusivity($temperature, $model);
+					}
+					catch (Exception $e)
+					{
+					}
+					
 					if ($constantModel) break;
 				}
 			}
@@ -54,11 +65,48 @@ class Mesh1D extends Mesh
 		return $this->maxDiffusivitity;
 	}
 
+	public function getMaxTransport($temperature)
+	{
+		if (is_null($this->maxTransport))
+		{
+			$transports = array();
+			foreach ($this->gridPoints as $gridPoint)
+			{
+				foreach ($gridPoint->getDopants() as $dopant)
+				{
+					$transports[] = $dopant->getElement()->getTransport($temperature);
+					break;
+				}
+			}
+			$this->maxTransport = max($transports);
+		}
+		return $this->maxTransport;
+	}
+
+
 	public function prepareForNewTimeIncrement()
 	{
 		$this->maxDiffusivitity = null;
 	}
 
+	public function addSurfaceOxide($oxideThickness)
+	{
+		//convert oxide thickness from angstroms to um
+		$oxideThickness = 0.0001 * $oxideThickness;
+		$numOxidePoints = ceil($oxideThickness / $this->dx);
+		for ($i = 0; $i < $numOxidePoints; $i++)
+		{
+			$oxidePoint = new GridPoint();
+			$oxidePoint->setMaterial("SiO2");
+			$this->unshift($oxidePoint);
+		}
+		$this->numOxidePoints = $numOxidePoints;
+	}
+
+	public function hasOxide()
+	{
+		return $this->numOxidePoints > 0;
+	}
 
 
 	public function setGridPoint($i,GridPoint $gridPoint)
@@ -141,6 +189,38 @@ class Mesh1D extends Mesh
 		}
 
 		return $flotData;
+	}
+
+	public function getFlotMarkings()
+	{
+		$graphMarkings = array();
+		$baseMark = array(
+			'color' => "#99ccff"
+		);
+		$previousGridPoint = null;
+		$lastMaterialStart = 0;
+		foreach ($this->gridPoints as $i => $gridPoint)
+		{
+			if (is_null($previousGridPoint))
+			{
+				$previousGridPoint = $gridPoint;
+			}
+			if ($previousGridPoint->isInterface($gridPoint))
+			{
+				$x = $i * $this->dx;
+				$xaxis = array(
+					'from' => $lastMaterialStart, 
+					'to' => $x
+				);
+				
+				$mark = $baseMark;
+				$mark['xaxis'] = $xaxis;
+				$graphMarkings[] = $mark;
+				$lastMaterialStart = $x;
+			}
+			$previousGridPoint = $gridPoint;
+		}
+		return $graphMarkings;
 	}
 
 	public function getDx()
@@ -239,7 +319,7 @@ class Mesh1D extends Mesh
 					$bn = $n1 - $mn * $x1;
 
 					$xj = ($bp - $bn)/($mn - $mp);
-					return $xj;
+					return $xj ;
 				}
 			}
 
@@ -247,6 +327,14 @@ class Mesh1D extends Mesh
 			$previousGridPoint = $gridPoint;
 		}
 		return 'unknown';
+	}
+
+	public function getJunctionDepthRelativeToSiSurface()
+	{
+		$junctionDepth = $this->getJunctionDepth();
+		if (is_numeric($junctionDepth))
+			return  $junctionDepth - ($this->numOxidePoints * $this->dx);
+		else return $junctionDepth;
 	}
 
 	public function getSheetResistance()
@@ -257,7 +345,8 @@ class Mesh1D extends Mesh
 		for ($i = 0; $i < $sumDepth; $i++)
 		{
 			$gridPoint = $this->gridPoints[$i];
-			$runningSum = $runningSum + ($gridPoint->calcMobility() * $this->getDx_cm() * $gridPoint->getDominateDopingConc());
+			if ($gridPoint->getMaterial() != 'SiO2')
+				$runningSum = $runningSum + ($gridPoint->calcMobility() * $this->getDx_cm() * $gridPoint->getDominateDopingConc());
 		}
 		$runningSum = $runningSum * ELECTRON_CHARGE;
 		

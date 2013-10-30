@@ -35,7 +35,6 @@ var radioChangeAction = function()
 	}
 	else
 	{
-		console.log("here");
 		$('#implantParams').hide();
 		$('#constSourceParams').show();
 	}

@@ -14,9 +14,11 @@ $headerData = array(
 	'assets' => $asssets,
 	'jsOnload' => 'draw();',
 	'js' => 'var graphData = ' . json_encode($graphData) . ';'
+	 . 'var graphMarkings = ' . json_encode($graphMarkings) .';'
 );
 $this->load->view('microelectronics/header', $headerData); 
 ?>
+
 <h1>RITPREM</h1>
 
 <div class="graphPlaceholder" id="theGraph" style="width:1018;height:550px;"></div>

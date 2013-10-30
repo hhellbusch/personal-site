@@ -15,3 +15,8 @@ img {
 	float:left;
 	margin-left: 10px;
 }
+
+input[type="text"]
+{
+	max-width:100px;
+}

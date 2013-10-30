@@ -39,17 +39,32 @@ if (!isset($dopants))
 
 <h1>RITPREM</h1>
 
+<?php
+$validationErrors = validation_errors(); 
+if (strlen($validationErrors) > 0)
+{
+	?>
+	<div class="alert alert-danger">
+		<h4>Errors!</h4>
+		<?php echo $validationErrors; ?>
+	</div>
+	<?php
+}
+?>
+
 <?php echo form_open('ritprem/simulate'); ?>
 	<h3>Simulation Space</h3>
 	<div class="form-group">
 		<label for="backgroundBase">Constant Background Doping Concentration</label>
 		<div>
-			<input type="number" name="backgroundBase" class='form-control' value="1" min="1", step=".1", max="9.9"/>
+			<input type="text" name="backgroundBase" class='form-control' value="1" />
 			<select name="backgroundPower" class="form-control">
 				<?php 
 				for($i = 9; $i < 20; $i++)
 				{
-					echo "<option value='$i'>$i</option>";
+					echo "<option value='$i'";
+					if ($i == 15) echo " selected ";
+					echo ">$i</option>";
 				}
 				?>
 			</select>
@@ -67,7 +82,7 @@ if (!isset($dopants))
 	<div class="form-group">
 		<label for="spacing">Grid Spacing</label>
 		<div class=''>
-			<input type="number" class="form-control" name="spacing" value="0.01" min="0.01" step="0.01" />
+			<input type="text" class="form-control" name="spacing" value="0.01" />
 			&mu;m
 		</div>
 	</div>
@@ -75,8 +90,15 @@ if (!isset($dopants))
 	<div class="form-group">
 		<label for="depth">Grid Depth</label>
 		<div>
-			<input type="number" class="form-control" name="depth" value="5" max="10.0" min="0.10" step="0.10" />
+			<input type="text" class="form-control" name="depth" value="3" />
 			&mu;m
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="oxideThickness">Surface Oxide Thickness</label>
+		<div>
+			<input type="text" class="form-control" name="oxideThicknes" /> &Aring;
 		</div>
 	</div>
 
@@ -98,13 +120,13 @@ if (!isset($dopants))
 			<div class='form-pull-left'>
 				<label>Energy</label>
 				<div>
-					<input class='form-control' type="number" name="implantEnergy" value="50" min="20" max="200" step="10"/> KeV
+					<input class='form-control' type="text" name="implantEnergy" value="50" /> KeV
 				</div>
 			</div>
 			<div class='form-pull-left'>
 				<label>Dose</label>
 				<div>
-					<input type="number" name="implantDose" class='form-control' value="1" min="1", step=".1", max="9.9"/>
+					<input type="text" name="implantDose" class='form-control' value="1"/>
 					<select name="implantDosePower" class="form-control">
 						<?php 
 						for($i = 9; $i < 20; $i++)
@@ -135,10 +157,11 @@ if (!isset($dopants))
 					<?php dopantTypesHTML($dopants, 'constSourceDopant');?>
 				</div>
 			</div>
+
 			<div class='form-pull-left'>
 				<label>Surface Dopant Concentration</label>
 				<div>
-					<input type="number" name="constSourceConcBase" class='form-control' value="1" min="1", step=".1", max="9.9"/>
+					<input type="text" name="constSourceConcBase" class='form-control' value="1" />
 					<select name="constSourceConcPower" class="form-control">
 						<?php 
 						for($i = 9; $i < 20; $i++)
@@ -153,21 +176,25 @@ if (!isset($dopants))
 			<div class='form-pull-left'>
 				<label>Temperature</label>
 				<div>
-					<input name="constSourceTemp" type="number" min="600" max="2000" step="50" value="900"/> Celsius 
+					<input class='form-control' name="constSourceTemp" type="text" value="900"/> Celsius 
 				</div>
 			</div>
+			<div class='clearfix'></div>
+		</div>
+
+		<div class='form-group'>
 			<div class='form-pull-left'>
 				<label>
 					Duration
 				</label>
 				<div>
-					<input name="constSourceTime" type="number" min="0" step="10" value="600"/> Seconds
+					<input class='form-control' name="constSourceTime" type="text" value="60"/> Minutes
 				</div>
 				
 			</div>
 			<div class='form-pull-left'>
 				<div><label>Model</label></div>
-				<select name="constantSourceModel">
+				<select class='form-control' name="constantSourceModel">
 					<option value='constant'>Constant Diffusivity</option>
 					<option value='fermi'>Fermi</option>
 				</select>
@@ -188,7 +215,7 @@ if (!isset($dopants))
 	</div>
 
 	<div class='form-group'>
-		<input type="submit" class='btn btn-primary' value="might work?"/>
+		<input type="submit" class='btn btn-primary' value="Execute"/>
 	</div>
 </form>
 
