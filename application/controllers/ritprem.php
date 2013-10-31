@@ -88,10 +88,12 @@ class Ritprem extends CI_Controller
 
 	public function simulate()
 	{
+
 		$input = $this->validateFormInput();
 		if ($input === FALSE) return;
 		//use user input to run a simulation
-		
+		ini_set('MAX_EXECUTION_TIME', 60*10); //max execute of 10 minutes
+
 		$backgroundConc = $input['backgroundBase'] * pow(10, $input['backgroundPower']);
 		$backgroundDopant = new Concentration($this->elemFactory->getElement($input['backgroundDopant']), $backgroundConc);
 		$mesh = new Mesh1D($input['depth'], $input['spacing'], $backgroundDopant);
