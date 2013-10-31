@@ -205,6 +205,50 @@ if (strlen($validationErrors) > 0)
 		</div>
 	</div>
 
+	<div class="radio">
+		<label>
+			<input type="radio" name="simulationType" id="glassRadio" value="glass"  />
+			Places a <strong>doped glass</strong> at the surface of the simulation space
+		</label>
+	</div>
+
+	<div id="glassParams" class='col-md-offset-1'>
+		<div class="form-group">
+
+			<div class='form-pull-left'>
+				<label>Thickness</label>
+				<div>
+					<input type="text" name="glassThickness" class="form-control" value="100" /> &Aring;
+				</div>
+			</div>
+
+			<div class='form-pull-left'>
+				<label>Dopant Type</label>
+				<div>
+					<?php dopantTypesHTML($dopants, 'glassDopant');?>
+				</div>
+			</div>
+
+			<div class='form-pull-left'>
+				<label>Glass Dopant Concentration</label>
+				<div>
+					<input type="text" name="glassConcBase" class='form-control' value="1" />
+					<select name="glassConcPower" class="form-control">
+						<?php 
+						for($i = 9; $i < 20; $i++)	
+						{
+							echo "<option value='$i'>$i</option>";
+						}
+						?>
+					</select>
+					cm<sup>-3</sup>
+				</div>
+			</div>
+			<div class='clearfix'></div>
+		</div>
+	</div>
+
+
 	<h3>
 		Diffusion
 		<button type="button" id="addDiffusionStep" class='btn btn-default'>Add diffusion step</button> 

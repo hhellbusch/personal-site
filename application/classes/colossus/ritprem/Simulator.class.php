@@ -94,9 +94,11 @@ class Simulator
 		$currentTime = 0;
 		log_message('Simulator::diffuse', 'debug');
 		$loopCount = 0;
+		$dt = 0;
 		while ($currentTime < $this->duration)
 		{
 			$dt = $this->calcDt();
+			//var_dump($dt);
 			$CI->benchmark->mark('diffuse_loop_'.$currentTime.'_start');
 			$previousMesh = clone $this->mesh;
 			$previousGridPoints = $previousMesh->getGridPoints();
@@ -110,8 +112,29 @@ class Simulator
 			$this->mesh->prepareForNewTimeIncrement();
 			$currentTime += $dt;
 			$loopCount++;
-			log_message('debug','t:'.$currentTime);
+			//if ($loopCount == 500) break;
 		}
+		//var_dump($dt);
+
+		// foreach ($this->mesh->getGridPoints() as $i => $gridPoint)
+		// {
+		// 	$dopants = $gridPoint->getDopants();
+		// 	$prettyDopants = array();
+		// 	foreach ($dopants as $key => $dopant)
+		// 	{
+		// 		$prettyDopants[$key] = array(
+		// 			'amount' => $dopant->getAmount(),
+		// 			'segregation' =>$dopant->getElement()->getSegregation($this->temperature),
+		// 			'transport' =>$dopant->getElement()->getTransport($this->temperature)
+		// 		);
+		// 	}
+		// 	$data = array(
+		// 			'index' => $i,
+		// 			'dopant' => $prettyDopants,
+		// 			'material' => $gridPoint->getMaterial()
+		// 	);
+		// 	//var_dump($data);
+		// }
 	}
 
 	private function diffuseDopantsAtIndex(&$gridPoints, $i, $dt, $dx, $currentTime)
@@ -135,16 +158,13 @@ class Simulator
 		$leftDopants = $leftPoint->getDopants();
 
 		//for each dopant at each point
-		$newGridPoint = new GridPoint();
-		$newGridPoint->setTime($currentTime);
-		$newGridPoint->setMaterial($gridPoint->getMaterial());
 		$dopantKeys = array();
 		$dopantKeys += array_keys($rightDopants);
 		$dopantKeys += array_keys($leftDopants);
 		
 		foreach ($dopantKeys as $dopantKey)
 		{
-			if (!isset($dopants[$dopantKey])) break;
+			if (!isset($dopants[$dopantKey])) continue;
 			$dopant = $dopants[$dopantKey];
 			$previousConc = $dopant->getConcentration();
 			$diffusivity = $dopant->getDiffusivity($this->temperature, $this->modelType);
@@ -166,27 +186,29 @@ class Simulator
 			}
 
 			//determine the parts of the new conc
-			$rightConcDiff = $rightConc - $previousConc;
 			$rightChangeCoef = $rightDiffusivity * $changeCoef;
-			if ($rightPoint->isInterface($gridPoint))
+			if ($this->mesh->atInterface($i) && $gridPoint->getMaterial() == 'SiO2')
 			{
-				$rightSegregation = 1/$dopant->getElement()->getSegregation($this->temperature);
-				$rightTransport = $dopant->getElement()->getTransport($this->temperature)/$rightSegregation;
-				
-				$rightChangeCoef = $rightTransport * $dt / $dx_cm;
-				$rightConcDiff = $rightConc / $rightSegregation - $previousConc;
-			}
+				$rightSegregation = $dopant->getElement()->getSegregation($this->temperature);
+				$rightTransport = -1*$dopant->getElement()->getTransport($this->temperature);
 
-			$leftConcDiff = $leftConc - $previousConc;
+				$rightConc = $rightConc / $rightSegregation;
+				$rightChangeCoef = $rightTransport * $dt / pow($dx_cm,1);
+			}
+			$rightConcDiff = $rightConc - $previousConc;
+
+
 			$leftChangeCoef = $leftDiffusivity * $changeCoef;
-			if ($leftPoint->isInterface($gridPoint))
+			if ($this->mesh->atInterface($i) && $gridPoint->getMaterial() == 'silicon')
 			{
 				$leftSegregation = $dopant->getElement()->getSegregation($this->temperature);
-				$leftTransport = $dopant->getElement()->getTransport($this->temperature);
-				$leftChangeCoef = $leftTransport * $dt / $dx_cm;
-				$leftConcDiff = $previousConc / $leftSegregation - $leftConc;
-			}
+				$leftTransport = $dopant->getElement()->getTransport($this->temperature)/$leftSegregation;
 
+				$leftConc = $leftConc * $leftSegregation;
+				$leftChangeCoef = $leftTransport * $dt / pow($dx_cm,1);
+			}
+			$leftConcDiff = $leftConc - $previousConc;
+			
 			$dopantMovingFromLeft = ($leftChangeCoef * $leftConcDiff);
 			$dopantMovingFromRight = ($rightChangeCoef * $rightConcDiff);
 			$addToCurrent = 0;
@@ -196,7 +218,6 @@ class Simulator
 				$right = new Concentration($dopant->getElement(), -1 * $dopantMovingFromRight);
 				$this->mesh->addDopantToGridPoint($i + 1, $right);
 				$addToCurrent = $addToCurrent +  $dopantMovingFromRight;
-			
 			}
 
 			if ($i > 0)
@@ -212,25 +233,25 @@ class Simulator
 			$this->mesh->addDopantToGridPoint($i, $current);
 			
 
-			$data = array(
-					'index' => $i,
-					'leftDelta' => $dopantMovingFromLeft,
-					'leftConcOld' => $leftConc,
-					'leftConcNew' => $this->mesh->getDopantAtGridPoint($i - 1, $dopantKey),
-					'rightDelta' => $dopantMovingFromRight,
-					'rightConcOld' => $rightConc,
-					'rightConcNew' => $this->mesh->getDopantAtGridPoint($i + 1, $dopantKey),
-					'changeToCurrent' => $addToCurrent,
-					'currentConcOld' => $previousConc,
-					'currentConcNew' => $this->mesh->getDopantAtGridPoint($i, $dopantKey),
-					'dopant' => $dopantKey
-			);
+			// $data = array(
+			// 		'index' => $i,
+			// 		'leftDelta' => $dopantMovingFromLeft,
+			// 		'leftConcOld' => $leftConc,
+			// 		'leftConcNew' => $this->mesh->getDopantAtGridPoint($i - 1, $dopantKey),
+			// 		'rightDelta' => $dopantMovingFromRight,
+			// 		'rightConcOld' => $rightConc,
+			// 		'rightConcNew' => $this->mesh->getDopantAtGridPoint($i + 1, $dopantKey),
+			// 		'changeToCurrent' => $addToCurrent,
+			// 		'currentConcOld' => $previousConc,
+			// 		'currentConcNew' => $this->mesh->getDopantAtGridPoint($i, $dopantKey),
+			// 		'dopant' => $dopantKey,
+			// 		'leftMaterial' => $leftPoint->getMaterial(),
+			// 		'material' => $gridPoint->getMaterial(),
+			// 		'rightMaterial' => $rightPoint->getMaterial()
+			// );
 			//var_dump($data);
 			
 
-			
-			
-			
 			if ($diffusivity * $dt / pow($dx, 2) > .5)
 			{
 				var_dump($diffusivity);
@@ -283,8 +304,6 @@ class Simulator
 
 			// 	exit;
 			// }
-
-			
 		}
 		
 	}

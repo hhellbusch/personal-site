@@ -93,6 +93,7 @@ class ElementFactory
 			'ddouble_e' => 4.37
 		));
 
+
 		$arsenic = new Element();
 		$arsenic->setFullName('arsenic');
 		$arsenic->setSymbol("As");

@@ -129,6 +129,13 @@ class Ritprem extends CI_Controller
 			$sim->consantSurfaceSourceDiffuse($surface);
 			$outputMesh = $sim->getMesh();
 		}
+		elseif($input['simulationType'] == 'glass')
+		{
+			$elem = $this->elemFactory->getElement($input['glassDopant']);
+			$amount = $input['glassConcBase'] * pow(10, $input['glassConcPower']);
+			$mesh->addGlass($input['glassThickness'], new Concentration($elem, $amount));
+			$outputMesh = $mesh;
+		}
 		else
 		{
 			echo 'you broke it!  try again and if it does it again please provide '
@@ -279,6 +286,29 @@ class Ritprem extends CI_Controller
 				'field' => 'constantSourceModel',
 				'label' => 'Constant Source Model',
 				'rules' => 'required|alpha'
+			);
+		}
+		elseif($input['simulationType'] == 'glass')
+		{
+			$formConfig[] = array(
+				'field' => 'glassThickness',
+				'label' => 'Glass Thickness',
+				'rules' => 'required|numeric|greater_than[99]'
+			);
+			$formConfig[] = array(
+				'field' => 'glassDopant',
+				'label' => "Glass Dopant",
+				'rules' => 'required|alpha'
+			);
+			$formConfig[] = array(
+				'field' => 'glassConcBase',
+				'label' => 'Glass Concentration Base',
+				'rules' => 'required|numeric|less_than[10]|greater_than[0]'
+			);
+			$formConfig[] = array(
+				'field' => 'glassConcPower',
+				'label' => 'Glass Concentration Exponent',
+				'rules' => 'required|integer|greater_than[8]|less_than[20]'
 			);
 		}
 

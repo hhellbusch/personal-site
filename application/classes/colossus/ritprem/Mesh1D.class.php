@@ -50,7 +50,7 @@ class Mesh1D extends Mesh
 				foreach ($gridPoint->getDopants() as $dopant)
 				{
 					try
-					{ 
+					{
 						$diffusivities[] = $dopant->getDiffusivity($temperature, $model);
 					}
 					catch (Exception $e)
@@ -65,6 +65,11 @@ class Mesh1D extends Mesh
 		return $this->maxDiffusivitity;
 	}
 
+	public function atInterface($i)
+	{
+		return $i == $this->numOxidePoints - 1 || $i == $this->numOxidePoints;
+	}
+
 	public function getMaxTransport($temperature)
 	{
 		if (is_null($this->maxTransport))
@@ -74,9 +79,9 @@ class Mesh1D extends Mesh
 			{
 				foreach ($gridPoint->getDopants() as $dopant)
 				{
-					$transports[] = $dopant->getElement()->getTransport($temperature);
-					break;
+					$transports[] = $dopant->getElement()->getTransport($temperature)/$dopant->getElement()->getSegregation($temperature);
 				}
+				break;
 			}
 			$this->maxTransport = max($transports);
 		}
@@ -98,9 +103,31 @@ class Mesh1D extends Mesh
 		{
 			$oxidePoint = new GridPoint();
 			$oxidePoint->setMaterial("SiO2");
+			foreach ($this->uniqueElements as $elem)
+			{
+				$oxidePoint->addDopant(new Concentration($elem, 0));
+			}
 			$this->unshift($oxidePoint);
 		}
-		$this->numOxidePoints = $numOxidePoints;
+		$this->numOxidePoints = $this->numOxidePoints + $numOxidePoints;
+	}
+
+	public function addGlass($oxideThickness, Concentration $conc)
+	{
+		$oxideThickness = 0.0001 * $oxideThickness;
+		$numOxidePoints = ceil($oxideThickness / $this->dx);
+		for ($i = 0; $i < $numOxidePoints; $i++)
+		{
+			$oxidePoint = new GridPoint();
+			$oxidePoint->setMaterial("SiO2");
+			foreach ($this->uniqueElements as $elem)
+			{
+				$oxidePoint->addDopant(new Concentration($elem, 0));
+			}
+			$oxidePoint->addDopant(new Concentration($conc->getElement(), $conc->getAmount()));
+			$this->unshift($oxidePoint);
+		}
+		$this->numOxidePoints =  $this->numOxidePoints+$numOxidePoints;
 	}
 
 	public function hasOxide()
@@ -219,7 +246,7 @@ class Mesh1D extends Mesh
 	{
 		$graphMarkings = array();
 		$baseMark = array(
-			'color' => "#99ccff"
+			'color' => "#009966"
 		);
 		$previousGridPoint = null;
 		$lastMaterialStart = 0;
@@ -234,7 +261,7 @@ class Mesh1D extends Mesh
 				$x = $i * $this->dx;
 				$xaxis = array(
 					'from' => $lastMaterialStart, 
-					'to' => $x
+					'to' => $x - ($this->dx/2)
 				);
 				
 				$mark = $baseMark;
@@ -319,6 +346,7 @@ class Mesh1D extends Mesh
 		$previousGridPoint = null;
 		foreach ($this->gridPoints as $i => $gridPoint)
 		{
+			if ($gridPoint->getMaterial() == 'SiO2') continue;
 			if (is_null($previousGridPoint)) $previousGridPoint = $gridPoint;
 			$difference = $previousGridPoint->getAcceptorConc() - $gridPoint->getDonorConc();
 			
@@ -365,14 +393,15 @@ class Mesh1D extends Mesh
 
 	public function getSheetResistance()
 	{
-		$xj = $this->getJunctionDepth();
+		$xj = $this->getJunctionDepthRelativeToSiSurface();
 		$sumDepth = ceil($xj / $this->dx);
+		$numGridPoints = count($this->gridPoints);
+		if ($sumDepth >= $numGridPoints) $sumDepth = $numGridPoints-1;
 		$runningSum = 0;
-		for ($i = 0; $i < $sumDepth; $i++)
+		for ($i = $this->numOxidePoints; $i < $sumDepth; $i++)
 		{
 			$gridPoint = $this->gridPoints[$i];
-			if ($gridPoint->getMaterial() != 'SiO2')
-				$runningSum = $runningSum + ($gridPoint->calcMobility() * $this->getDx_cm() * $gridPoint->getDominateDopingConc());
+			$runningSum = $runningSum + ($gridPoint->calcMobility() * $this->getDx_cm() * $gridPoint->getDominateDopingConc());
 		}
 		$runningSum = $runningSum * ELECTRON_CHARGE;
 		

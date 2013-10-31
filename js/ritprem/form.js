@@ -22,6 +22,10 @@ var onLoad = function()
 	{
 		radioChangeAction();
 	});
+	$('#glassRadio').on('change', function()
+	{
+		radioChangeAction();
+	});
 	$('#implantRadio').change();
 	
 }
@@ -31,11 +35,19 @@ var radioChangeAction = function()
 	if ($('#implantRadio').is(":checked"))
 	{
 		$('#implantParams').show();
+		$('#glassParams').hide();
 		$('#constSourceParams').hide();
+	}
+	else if ($('#constSourceRadio').is(":checked"))
+	{
+		$('#implantParams').hide();
+		$('#glassParams').hide();
+		$('#constSourceParams').show();
 	}
 	else
 	{
 		$('#implantParams').hide();
-		$('#constSourceParams').show();
+		$('#glassParams').show();
+		$('#constSourceParams').hide();
 	}
 }

@@ -4,6 +4,7 @@ if (!function_exists("round_sig_figs"))
 	function round_sig_figs($number, $sigdigs)
 	{
 		log_message('debug', 'round_sig_figs: number->' . $number. ' sigfigs ' . $sigdigs);
+		return $number;
 		if(!is_numeric($number))  return '';
 		if ($number == 0 ) return $number;
 		$multiplier = 1; 
