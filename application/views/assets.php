@@ -20,6 +20,7 @@ foreach ($cssFiles as $cssFile)
 
 $jsFiles = array(
 	'jquery/jquery-1.10.2.min',
+	'jquery/jquery-ui-1.10.3.custom.min',
 	'bootstrap/bootstrap',
 );
 if (isset($additionalJSFiles))
