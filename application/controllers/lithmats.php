@@ -89,22 +89,50 @@ class Lithmats extends CI_Controller
 	{
 		$viewData = array();
 
+		$defaultValues = array(
+			'substrateIndexReal' => 1.58,
+			'substrateIndexImaginary' => "3.60",
+			'polyIndexReal' => 1.69,
+			'polyIndexImaginary' => 2.76,
+			'resistIndexReal' => 1.76,
+			'resistIndexImaginary' => 0.007,
+			'polyThickness' => 15,
+			'resistThickness' => 800,
+			'barcIndexStart' => 1,
+			'barcIndexEnd' => 2,
+			'barcIndexStep' => 0.5,
+			'barcExtinctionStart' => 0.1,
+			'barcExtinctionEnd' => 0.3,
+			'barcExtinctionStep' => 0.1,
+			'barcThicknessStart' => 100,
+			'barcThicknessEnd' => 300,
+			'barcThicknessStep' => 1,
+			'wavelength' => 248
+		);
+
 		//TODO: add form validations
 		if ($this->input->post() !== FALSE)
 		{
 			//process input
-			
+			$subN = $this->input->post('substrateIndexReal');
+			$subK = $this->input->post('substrateIndexImaginary');
 			$subIndex = new Math_Complex(
-				$this->input->post('substrateIndexReal'), 
-				$this->input->post('substrateIndexImaginary')
+				$subN, 
+				$subK
 			);
+
+			$polyN =$this->input->post('polyIndexReal');
+			$polyK = $this->input->post('polyIndexImaginary');
 			$polyIndex = new Math_Complex(
-				$this->input->post('polyIndexReal'), 
-				$this->input->post('polyIndexImaginary')
+				$polyN,
+				$polyK
 			);
+
+			$resistN = $this->input->post('resistIndexReal');
+			$resistK = $this->input->post('resistIndexImaginary');
 			$resistIndex = new Math_Complex(
-				$this->input->post('resistIndexReal'), 
-				$this->input->post('resistIndexImaginary')
+				$resistN,
+				$resistK
 			);
 			$polyThickness = $this->input->post('polyThickness');
 			$resistThickness = $this->input->post('resistThickness');
@@ -122,6 +150,27 @@ class Lithmats extends CI_Controller
 			$barcThicknessStep = $this->input->post('barcThicknessStep');
 
 			$wavelength = $this->input->post('wavelength');
+
+			$defaultValues = array(
+				'substrateIndexReal' => $subN,
+				'substrateIndexImaginary' => $subK,
+				'polyIndexReal' => $polyN,
+				'polyIndexImaginary' => $polyK,
+				'resistIndexReal' => $resistN,
+				'resistIndexImaginary' => $resistK,
+				'polyThickness' => $polyThickness,
+				'resistThickness' => $resistThickness,
+				'barcIndexStart' => $barcIndexStart,
+				'barcIndexEnd' => $barcIndexEnd,
+				'barcIndexStep' => $barcIndexStep,
+				'barcExtinctionStart' => $barcExtinctionStart,
+				'barcExtinctionEnd' => $barcExtinctionEnd,
+				'barcExtinctionStep' => $barcIndexStep,
+				'barcThicknessStart' => $barcThicknessStart,
+				'barcThicknessEnd' => $barcThicknessEnd,
+				'barcThicknessStep' => $barcThicknessStep,
+				'wavelength' => $wavelength
+			);
 
 			$reflectivities = array();
 
@@ -166,14 +215,15 @@ class Lithmats extends CI_Controller
 				)
 			);
 
-			
-
 			$data = $this->calcCurveData($stack, 2, 2, $wavelength);
-			//var_dump($data);
-			//
+
 			$viewData['graphData'] = $data;
 		}
-
+		
+		foreach ($defaultValues as $param => $value)
+		{
+			$viewData[$param] = $value;
+		}
 
 		$this->load->view('microelectronics/lithmats/filmStack', $viewData);
 	}

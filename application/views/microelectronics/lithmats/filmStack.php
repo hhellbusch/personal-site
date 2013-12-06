@@ -20,7 +20,29 @@ if (isset($graphData))
 }
 
 $this->load->view('microelectronics/header', $headerData);
+
+/*
+
+'substrateIndexReal' => $subN,
+'substrateIndexImaginary' => $subK,
+'polyIndexReal' => $polyN,
+'polyIndexImaginary' => $polyK,
+'resistIndexReal' => $resistN,
+'resistIndexImaginary' => $resistK,
+'polyThickness' => $polyThickness,
+'resistThickness' => $resistThickness,
+'barcIndexStart' => $barcIndexStart,
+'barcIndexEnd' => $barcIndexEnd,
+'barcIndexStep' => $barcIndexStep,
+'barcExtinctionStart' => $barcExtinctionStart,
+'barcExtinctionEnd' => $barcExtinctionEnd,
+'barcExtinctionStep' => $barcIndexStep,
+'wavelength' => $wavelength
+
+ */
+
 ?>
+
 
 
 <h1>Film Stack Reflectivity</h1>
@@ -32,7 +54,7 @@ $this->load->view('microelectronics/header', $headerData);
 		<div class="form-group">
 			<label for="wavelength">Wavelength of Exposure</label>
 			<div>
-				<input type="text" name="wavelength" class='form-control' value="248" /> nm
+				<input type="text" name="wavelength" class='form-control' value="<?php echo $wavelength; ?>" /> nm
 				
 			</div>
 		</div>
@@ -41,8 +63,8 @@ $this->load->view('microelectronics/header', $headerData);
 	<div class="form-group">
 		<label for="substrateIndexReal">Substrate Index of Refraction</label>
 		<div>
-			<input type="text" name="substrateIndexReal" class='form-control' value="1.58" /> +
-			<input type="text" name="substrateIndexImaginary" class='form-control' value="3.60" /> i
+			<input type="text" name="substrateIndexReal" class='form-control' value="<?php echo $substrateIndexReal; ?>" /> +
+			<input type="text" name="substrateIndexImaginary" class='form-control' value="<?php echo $substrateIndexImaginary; ?>" /> i
 		</div>
 	</div>
 	
@@ -50,18 +72,18 @@ $this->load->view('microelectronics/header', $headerData);
 	<div class="form-group">
 		<label for="polyIndexReal">Polysilcion Index of Refraction</label>
 		<div>
-			<input type="text" name="polyIndexReal" class='form-control' value="1.69" /> +
-			<input type="text" name="polyIndexImaginary" class='form-control' value="2.76" /> i &nbsp; &nbsp;
-			with thickness of <input type="text" name="polyThickness" class='form-control' value="15" /> nm
+			<input type="text" name="polyIndexReal" class='form-control' value="<?php echo $polyIndexReal; ?>" /> +
+			<input type="text" name="polyIndexImaginary" class='form-control' value="<?php echo $polyIndexImaginary; ?>" /> i &nbsp; &nbsp;
+			with a thickness of <input type="text" name="polyThickness" class='form-control' value="<?php echo $polyThickness; ?>" /> nm
 		</div>
 	</div>
 
 	<div class="form-group">
 		<label for="substrateIndexReal">Photoresist Index of Refraction of</label>
 		<div>
-			<input type="text" name="resistIndexReal" class='form-control' value="1.76" /> +
-			<input type="text" name="resistIndexImaginary" class='form-control' value="0.007" /> i &nbsp; &nbsp;
-			with a thickness of <input type="text" name="resistThickness" class='form-control' value="800" /> nm
+			<input type="text" name="resistIndexReal" class='form-control' value="<?php echo $resistIndexReal; ?>" /> +
+			<input type="text" name="resistIndexImaginary" class='form-control' value="<?php echo $resistIndexImaginary; ?>" /> i &nbsp; &nbsp;
+			with a thickness of <input type="text" name="resistThickness" class='form-control' value="<?php echo $resistThickness; ?>" /> nm
 		</div>
 	</div>
 	
@@ -70,27 +92,27 @@ $this->load->view('microelectronics/header', $headerData);
 	<div class="form-group">
 		<label for="barcIndexStart">Index of refraction of BARC (n)</label>
 		<div>
-			Start: <input type="text" name="barcIndexStart" class='form-control' value="1" /> 
-			To: <input type="text" name="barcIndexEnd" class='form-control' value="2" />
-			Step: <input type="text" name="barcIndexStep" class='form-control' value="0.5" />
+			Start: <input type="text" name="barcIndexStart" class='form-control' value="<?php echo $barcIndexStart; ?>" /> 
+			To: <input type="text" name="barcIndexEnd" class='form-control' value="<?php echo $barcIndexEnd; ?>" />
+			Step: <input type="text" name="barcIndexStep" class='form-control' value="<?php echo $barcIndexStep; ?>" />
 		</div>
 	</div>
 
 	<div class="form-group">
 		<label for="barcIndexStart">Extinction coefficient of BARC (k)</label>
 		<div>
-			Start: <input type="text" name="barcExtinctionStart" class='form-control' value="0.1" /> 
-			To: <input type="text" name="barcExtinctionEnd" class='form-control' value="0.3" />
-			Step: <input type="text" name="barcExtinctionStep" class='form-control' value="0.1" />
+			Start: <input type="text" name="barcExtinctionStart" class='form-control' value="<?php echo $barcExtinctionStart; ?>" /> 
+			To: <input type="text" name="barcExtinctionEnd" class='form-control' value="<?php echo $barcExtinctionEnd; ?>" />
+			Step: <input type="text" name="barcExtinctionStep" class='form-control' value="<?php echo $barcExtinctionStep; ?>" />
 		</div>
 	</div>
 
 	<div class="form-group">
 		<label for="barcIndexStart">Thickness of BARC (in units of nm)</label>
 		<div>
-			Start: <input type="text" name="barcThicknessStart" class='form-control' value="100" /> 
-			To: <input type="text" name="barcThicknessEnd" class='form-control' value="300" />
-			Step: <input type="text" name="barcThicknessStep" class='form-control' value="5" />
+			Start: <input type="text" name="barcThicknessStart" class='form-control' value="<?php echo $barcThicknessStart; ?>" /> 
+			To: <input type="text" name="barcThicknessEnd" class='form-control' value="<?php echo $barcThicknessEnd; ?>" />
+			Step: <input type="text" name="barcThicknessStep" class='form-control' value="<?php echo $barcThicknessStep; ?>" />
 		</div>
 	</div>
 
