@@ -165,7 +165,7 @@ class Lithmats extends CI_Controller
 				'barcIndexStep' => $barcIndexStep,
 				'barcExtinctionStart' => $barcExtinctionStart,
 				'barcExtinctionEnd' => $barcExtinctionEnd,
-				'barcExtinctionStep' => $barcIndexStep,
+				'barcExtinctionStep' => $barcExtinctionStep,
 				'barcThicknessStart' => $barcThicknessStart,
 				'barcThicknessEnd' => $barcThicknessEnd,
 				'barcThicknessStep' => $barcThicknessStep,
